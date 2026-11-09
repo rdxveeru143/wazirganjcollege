@@ -11,15 +11,15 @@
     <meta name="google-site-verification" content="DwwmxVG0d-xPajDN81t6NZ-M6sA34d-1uta9QoSAnt8" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Wazirganj College Updates" />
-    <meta property="og:title" content="Wazirganj College Updates — Exam Form, Result, Marksheet & Notices" />
-    <meta property="og:description" content="Wazirganj College aur Magadh University ke sabhi updates ek jagah — exam form last dates, semester results, marksheets, admission notices aur official links. Sessions 2023-27 to 2026-30." />
+    <meta property="og:title" content="Wazirganj College Updates — Exam Form, Result, Marksheet" />
+    <meta property="og:description" content="Exam Form, Result, Marksheet — Wazirganj College aur Magadh University ke sabhi updates ek jagah: exam form last dates, semester results, marksheets, admission notices aur official portal links. U.G. Sessions 2023-27, 2024-28, 2025-29, 2026-30." />
     <meta property="og:url" content="https://wazirganjcollege.vercel.app/" />
     <meta property="og:image" content="https://wazirganjcollege.vercel.app/assets/logo.png" />
     <meta property="og:image:width" content="240" />
     <meta property="og:image:height" content="247" />
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="Wazirganj College Updates — Exam Form, Result & Notices" />
-    <meta name="twitter:description" content="Exam form last dates, semester results, marksheets and college notices for Wazirganj College students (Magadh University). Sessions 2023-27 to 2026-30." />
+    <meta name="twitter:title" content="Wazirganj College Updates — Exam Form, Result, Marksheet" />
+    <meta name="twitter:description" content="Exam Form, Result, Marksheet — exam form last dates, semester results, marksheets and college notices for Wazirganj College students (Magadh University). Sessions 2023-27 to 2026-30." />
     <meta name="twitter:image" content="https://wazirganjcollege.vercel.app/assets/logo.png" />
     <meta name="theme-color" content="#0e1c3a" />
     <script>
@@ -332,7 +332,16 @@
       .dl-row {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
         padding: 12px 0; border-top: 1px solid var(--border);
+        position: relative;
       }
+      /* Whole deadline card is clickable: a click anywhere on the card
+         (except on its own buttons/links) opens that session's exam-form
+         notice detail page — handled in the deadlines script below. */
+      .dl-row.dl-clickable { cursor: pointer; transition: border-color .25s ease, box-shadow .25s ease, background-color .25s ease; }
+      .dl-row.dl-clickable:hover { border-color: var(--red); }
+      .dl-row.dl-clickable:focus-within { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192, 39, 45, .18); }
+      .dl-title-link { color: inherit; text-decoration: none; }
+      .dl-title-link:hover { color: var(--navy); text-decoration: underline; }
       .dl-row:first-of-type { border-top: none; }
       .dl-main { flex: 1 1 260px; min-width: 0; }
       .dl-main b { display: block; font-size: 1.02rem; }
@@ -990,15 +999,29 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
           else if (d === 1) { tag = "Closing Tomorrow"; cls = "blink"; }
           else if (d <= 5) { tag = d + " days remaining"; }
           else { tag = d + " days remaining"; cls = ""; }
-          var act = actionFor(u);
           var key = sessionKeyOf(u);
-          var h = '<div class="dl-row"><div class="dl-main"><b>' + esc(u.title) + '</b><span><a class="session-link" href="' + sessionPath(key) + '">' +
+          var detail = updatePath(u.slug);
+          /* Fill Exam Form always goes straight to THIS session's MU
+             student-login portal (verified per-session link), falling
+             back to the notice's own official link if ever needed. */
+          var portal = SESSION_PORTALS[key] || u.officialLink || "";
+          var h = '<div class="dl-row dl-clickable" data-slug="' + esc(u.slug) + '"><div class="dl-main"><b><a class="dl-title-link" href="' + detail + '">' + esc(u.title) + '</a></b><span><a class="session-link" href="' + sessionPath(key) + '">' +
             esc(sectionLabel(u)) + "</a>" + (u.lastDateLabel ? " · " + esc(u.lastDateLabel) : "") + "</span></div>";
           h += '<div class="dl-when"><span class="dl-date">' + fmtDate(u.lastDate) + '</span><span class="alert-tag' + (d <= 1 ? "" : " soon") + (cls ? " " + cls : "") + '">' + tag + '</span></div>';
-          if (act) h += '<a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(u.officialLink) + '">' + act + "</a>";
-          h += '<a class="btn btn-outline" href="' + updatePath(u.slug) + '">View Notice</a></div>';
+          if (portal) h += '<a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(portal) + '">Fill Exam Form</a>';
+          h += '<a class="btn btn-outline" href="' + detail + '">View Notice</a></div>';
           return h;
         }).join("");
+        /* Whole card clickable: any click that is not on the card's own
+           link/button (Fill Exam Form, session link, title, View Notice)
+           opens the notice detail page, same as View Notice does. */
+        document.querySelectorAll("#dl-list .dl-row").forEach(function (row) {
+          row.addEventListener("click", function (e) {
+            if (e.target && e.target.closest && e.target.closest("a, button")) return;
+            var slug = row.getAttribute("data-slug");
+            if (slug) navigateTo(updatePath(slug), null);
+          });
+        });
       })();
 
       /* ---------- Main Notices (home shows only the main ones) ---------- */
