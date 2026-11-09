@@ -493,6 +493,30 @@
       .faq-card a { color: var(--navy); font-weight: 700; text-decoration: underline; }
       .faq-card a:hover { color: var(--red); }
 
+      /* ---------- Documents checklists (Admission & Exam Form) ---------- */
+      .docs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 14px; }
+      .docs-card {
+        background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+        box-shadow: var(--shadow); padding: 18px;
+      }
+      .docs-card h3 { margin: 0 0 8px; font-size: 1.1rem; line-height: 1.35; color: var(--navy); }
+      .docs-card p { margin: 0 0 10px; color: var(--dim); font-size: .95rem; line-height: 1.55; }
+      .docs-card a { color: var(--navy); font-weight: 700; text-decoration: underline; }
+      .docs-card a:hover { color: var(--red); }
+      .docs-list { margin: 0 0 10px; padding-left: 20px; }
+      .docs-list li { margin: 0 0 5px; color: var(--text); font-size: .95rem; line-height: 1.5; }
+      .docs-note { background: #fff8e1; border: 1px solid #f0d060; border-radius: 8px; padding: 10px 12px; }
+      .docs-print { margin-top: 4px; }
+      @media print {
+        body.printing header.site, body.printing footer.site, body.printing #view-detail, body.printing #view-session { display: none !important; }
+        body.printing #view-home > *:not(#docs) { display: none !important; }
+        body.printing #docs .docs-grid > article:not(.printing) { display: none !important; }
+        body.printing .docs-print { display: none !important; }
+        body.printing #docs { box-shadow: none !important; border: none !important; }
+        body.printing .docs-card { border: 1.5px solid #000 !important; box-shadow: none !important; }
+        body.printing .docs-note { border: 1px solid #000 !important; background: #fff !important; }
+      }
+
       /* ---------- Link lists (results / useful) ---------- */
       .link-group { margin-bottom: 18px; }
       .link-group h3 { margin: 0 0 10px; font-size: 1.08rem; }
@@ -938,6 +962,60 @@
             </article>
           </div>
         </section>
+
+        <section class="block" id="docs" aria-labelledby="docs-h">
+          <div class="sec-head"><h2 id="docs-h">Admission &amp; Exam Form — Documents Checklist</h2><span class="sec-note">Har session ke liye — general list</span></div>
+          <div class="docs-grid">
+            <article class="docs-card" id="docs-admission">
+              <h3>Admission — kya-kya lagta hai</h3>
+              <p>Admission portal: <a href="https://wazirganjcollege.edmitr.in/" target="_blank" rel="noreferrer">EdMitr — wazirganjcollege.edmitr.in</a></p>
+              <ul class="docs-list">
+                <li>Online admission form ka printout</li>
+                <li>Aadhaar Card + APAAR ID</li>
+                <li>Pichhle semester ka admit card (readmission ke liye)</li>
+                <li>Pichhle semester ki marksheet (readmission ke liye)</li>
+                <li>Class 10th / 12th marksheet + certificate (naye admission ke liye)</li>
+                <li>CLC / Transfer Certificate — original (naye admission ke liye)</li>
+                <li>Migration Certificate (dusre board / university se aaye hon to)</li>
+                <li>Passport size photo — 4 se 6</li>
+                <li>Bank details — account number + IFSC</li>
+                <li>Caste / Income / Residential / EWS certificate (jis par lagu ho)</li>
+                <li>Fee payment receipt / challan</li>
+              </ul>
+              <p class="docs-note">Final list, last date aur fee har session ke college notice ke anusaar hoti hai — jaane se pehle website par latest notice check kar lein.</p>
+              <button type="button" class="btn btn-navy docs-print">🖨️ Print karein</button>
+            </article>
+            <article class="docs-card" id="docs-examform">
+              <h3>Exam Form — kya-kya lagta hai</h3>
+              <p>Exam form portal: <a href="https://www.magadhonline.in/student/dashboard" target="_blank" rel="noreferrer">magadhonline.in — Student Dashboard</a></p>
+              <ul class="docs-list">
+                <li>Pichhle semester ka admit card — User ID isi ka number hai (23G00 se shuru)</li>
+                <li>Registration number</li>
+                <li>Naam + Date of Birth — password ke liye (naam ke pehle 4 akshar CAPS + DOB DDMMYYYY)</li>
+                <li>Fee payment — online (UPI / Card)</li>
+                <li>Bhare hue form ka printout / receipt</li>
+              </ul>
+              <p><b>Login kaise karein:</b> User ID — admit card me jo 23G00 se shuru hota hai, wahi aapka User ID hai. Password — apne naam ke pehle chaar akshar (sabhi capital me) + apni janm-tithi DDMMYYYY format me. Example: naam Veeru Verma aur janm-tithi 11 May 2005 ho to password hoga: VEER11052005.</p>
+              <p class="docs-note">Dashboard me Exam Form ka option dikh raha ho to form turant bharein; option nahi dikh raha to college se validate hone ka intezaar karein. Last date aur fee — college notice ke anusaar.</p>
+              <button type="button" class="btn btn-navy docs-print">🖨️ Print karein</button>
+            </article>
+          </div>
+        </section>
+        <script>
+        (function(){
+          function cleanup(){ document.body.classList.remove('printing'); document.querySelectorAll('.docs-card.printing').forEach(function(e){ e.classList.remove('printing'); }); }
+          window.addEventListener('afterprint', cleanup);
+          document.querySelectorAll('.docs-print').forEach(function(btn){
+            btn.addEventListener('click', function(){
+              cleanup();
+              var card = btn.closest('.docs-card');
+              if (card) card.classList.add('printing');
+              document.body.classList.add('printing');
+              setTimeout(function(){ window.print(); }, 60);
+            });
+          });
+        })();
+        </script>
 
         <section class="block" id="faq" aria-labelledby="faq-h">
           <div class="sec-head"><h2 id="faq-h">Frequently Asked Questions</h2></div>
