@@ -337,6 +337,21 @@
       .deadlines h2 { margin: 0 0 4px; font-size: 1.3rem; color: var(--red-dark); }
       @media (prefers-color-scheme: dark) { .deadlines h2 { color: #ff9a9e; } }
       .deadlines p.lead { margin: 0 0 12px; color: var(--dim); font-size: .95rem; }
+      /* Important Deadlines ka personal/direct link:
+         https://wazirganjcollege.vercel.app/#important-deadlines —
+         section ka stable id yahi hai. Sticky header ke neeche sahi
+         jagah rukne ke liye scroll margin, aur is link se aane par
+         section kuch der ke liye highlight hota hai (JS neeche). */
+      #important-deadlines { scroll-margin-top: 118px; }
+      .dl-heading-link { color: inherit; text-decoration: none; }
+      .dl-heading-link:hover, .dl-heading-link:focus-visible { text-decoration: underline; }
+      .dl-direct-link { color: var(--navy); font-weight: 700; word-break: break-all; }
+      .dl-direct-link:hover { color: var(--red); }
+      #important-deadlines.is-highlight .deadlines { animation: dlHighlight 2.6s ease both; }
+      @keyframes dlHighlight {
+        0%, 55% { background: #fff7d6; box-shadow: 0 0 0 4px var(--yellow), 0 0 0 9px rgba(192, 39, 45, .35); }
+        100% { background: var(--surface); box-shadow: var(--shadow); }
+      }
       .dl-row {
         display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
         padding: 12px 0; border-top: 1px solid var(--border);
@@ -648,30 +663,31 @@
       }
       .detail .box b { color: var(--text); }
       .detail .actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
-      /* Notice detail: live countdown to the notice's last date —
-         days / hours / minutes / seconds, ticking every second, with the
-         same alert tag (Closing Today / X days remaining) as the home
-         Important Deadlines list. Sirf un notices par dikhta hai jinki
-         last date hai. */
+      /* Notice detail: days-only countdown to the notice's last date —
+         koi ticking Hours/Minutes/Seconds timer nahi; box me sirf last
+         date aur bache hue din (days remaining) dikhte hain, Important
+         Deadlines wali hi ginati (daysUntil) se. Sirf un notices par
+         dikhta hai jinki last date hai. */
       .countdown {
         margin-top: 14px; border: 2px solid var(--red); border-radius: 10px;
         padding: 13px 15px; background: var(--surface-alt);
+        display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap;
       }
       .countdown .cd-head {
-        display: flex; align-items: center; justify-content: space-between;
-        gap: 8px 12px; flex-wrap: wrap; margin-bottom: 10px;
+        display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap;
+        flex: 1 1 260px; min-width: 0;
       }
       .countdown .cd-title { font-weight: 800; color: var(--red-dark); font-size: .92rem; letter-spacing: .4px; text-transform: uppercase; }
-      .countdown .cd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-      .countdown .cd-cell {
-        text-align: center; background: var(--surface);
-        border: 1px solid var(--border); border-radius: 9px; padding: 8px 4px;
+      .countdown .cd-days {
+        display: flex; align-items: baseline; gap: 8px; flex: none;
+        background: var(--surface); border: 1px solid var(--border); border-radius: 9px;
+        padding: 8px 16px;
       }
-      .countdown .cd-cell b { display: block; font-size: 1.5rem; line-height: 1.1; color: var(--navy); font-variant-numeric: tabular-nums; }
-      .countdown .cd-cell span { font-size: .7rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
+      .countdown .cd-days b { font-size: 1.9rem; line-height: 1.1; color: var(--navy); font-variant-numeric: tabular-nums; }
+      .countdown .cd-days span { font-size: .78rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--dim); }
       .countdown.cd-closed { border-color: var(--border); }
       .countdown.cd-closed .cd-title { color: var(--dim); }
-      .countdown.cd-closed .cd-cell b { color: var(--dim); }
+      .countdown.cd-closed .cd-days b { color: var(--dim); }
       .backlink { display: inline-block; margin-top: 18px; font-weight: 700; color: var(--navy); text-decoration: none; }
       @media (prefers-color-scheme: dark) { .backlink { color: var(--text); } }
       .backlink:hover { text-decoration: underline; }
@@ -1097,9 +1113,10 @@
         </section>
 
         <div class="top-split">
-          <section class="block" id="deadlines-block" aria-labelledby="dl-h">
+          <section class="block" id="important-deadlines" aria-labelledby="dl-h">
             <div class="deadlines">
-              <h2 id="dl-h">Important Deadlines</h2>
+              <h2 id="dl-h"><a class="dl-heading-link" href="/#important-deadlines">Important Deadlines</a></h2>
+              <p class="lead">Direct link: <a class="dl-direct-link" href="/#important-deadlines">wazirganjcollege.vercel.app/#important-deadlines</a></p>
               <div id="dl-list"></div>
             </div>
           </section>
@@ -1574,7 +1591,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         var now = todayISO();
         var active = UPDATES.filter(function (u) { return u.lastDate && u.lastDate >= now; })
           .sort(function (a, b) { return a.lastDate < b.lastDate ? -1 : 1; });
-        var block = document.getElementById("deadlines-block");
+        var block = document.getElementById("important-deadlines");
         if (!active.length) { block.classList.add("hidden"); return; }
         document.getElementById("dl-list").innerHTML = active.map(function (u) {
           var d = daysUntil(u.lastDate);
@@ -1746,44 +1763,32 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
       function linkify(text) {
         return esc(text).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noreferrer">$1</a>');
       }
-      /* Live countdown on notice detail pages that carry a last date:
-         ticks every second down to the end of the last date (23:59:59),
-         with the same alert tag wording as Important Deadlines. */
-      var countdownTimer = null;
-      function stopCountdown() {
-        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
-      }
+      /* Days-only countdown on notice detail pages that carry a last
+         date: koi ticking Hours/Minutes/Seconds timer nahi — sirf bache
+         hue din gin kar dikhaye jate hain (daysUntil, Important
+         Deadlines wali hi ginati), last date ke saath. Ek baar render
+         hota hai, koi interval nahi chalta. */
+      function stopCountdown() { /* No timer runs anymore — kept as a no-op for the router. */ }
       function startDetailCountdown(iso) {
-        stopCountdown();
         var box = document.getElementById("detail-countdown");
         if (!box) return;
-        var elD = document.getElementById("cd-d"), elH = document.getElementById("cd-h"),
-            elM = document.getElementById("cd-m"), elS = document.getElementById("cd-s"),
+        var elD = document.getElementById("cd-d"),
+            elLabel = document.getElementById("cd-days-label"),
             tag = document.getElementById("cd-tag");
-        var target = new Date(iso + "T23:59:59");
-        function pad(n) { return String(n).padStart(2, "0"); }
-        function tick() {
-          var diff = target.getTime() - Date.now();
-          if (diff <= 0) {
-            elD.textContent = "0"; elH.textContent = "00"; elM.textContent = "00"; elS.textContent = "00";
-            tag.textContent = "Closed";
-            tag.className = "alert-tag soon";
-            box.classList.add("cd-closed");
-            stopCountdown();
-            return;
-          }
-          var totalSec = Math.floor(diff / 1000);
-          var d = Math.floor(totalSec / 86400);
-          var hh = Math.floor((totalSec % 86400) / 3600);
-          var mm = Math.floor((totalSec % 3600) / 60);
-          var ss = totalSec % 60;
-          elD.textContent = d; elH.textContent = pad(hh); elM.textContent = pad(mm); elS.textContent = pad(ss);
-          if (d === 0) { tag.textContent = "Closing Today"; tag.className = "alert-tag blink"; }
-          else if (d === 1) { tag.textContent = "Closing Tomorrow"; tag.className = "alert-tag blink"; }
-          else { tag.textContent = d + " days remaining"; tag.className = "alert-tag soon"; }
+        var d = daysUntil(iso);
+        if (d < 0) {
+          elD.textContent = "0";
+          if (elLabel) elLabel.textContent = "days remaining";
+          tag.textContent = "Closed";
+          tag.className = "alert-tag soon";
+          box.classList.add("cd-closed");
+          return;
         }
-        tick();
-        countdownTimer = setInterval(tick, 1000);
+        elD.textContent = d;
+        if (elLabel) elLabel.textContent = d === 1 ? "day remaining" : "days remaining";
+        if (d === 0) { tag.textContent = "Closing Today"; tag.className = "alert-tag blink"; }
+        else if (d === 1) { tag.textContent = "Closing Tomorrow"; tag.className = "alert-tag blink"; }
+        else { tag.textContent = d + " days remaining"; tag.className = "alert-tag soon"; }
       }
       function showDetail(slug) {
         var u = null;
@@ -1798,13 +1803,8 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         h += '<p class="meta">Published on ' + fmtDate(u.date) + ' · <a href="' + sessionPath(sessionKeyOf(u)) + '">' + esc(sectionLabel(u)) + "</a></p>";
         if (u.lastDate) {
           h += '<p class="lastdate" style="font-weight:700;color:var(--red)">Submission Deadline: ' + fmtDate(u.lastDate) + (u.lastDateLabel ? " — " + esc(u.lastDateLabel) : "") + "</p>";
-          h += '<div class="countdown" id="detail-countdown"><div class="cd-head"><span class="cd-title">Countdown to Last Date — ' + fmtDate(u.lastDate) + '</span><span class="alert-tag soon" id="cd-tag"></span></div>' +
-            '<div class="cd-grid">' +
-            '<div class="cd-cell"><b id="cd-d">–</b><span>Days</span></div>' +
-            '<div class="cd-cell"><b id="cd-h">–</b><span>Hours</span></div>' +
-            '<div class="cd-cell"><b id="cd-m">–</b><span>Minutes</span></div>' +
-            '<div class="cd-cell"><b id="cd-s">–</b><span>Seconds</span></div>' +
-            "</div></div>";
+          h += '<div class="countdown" id="detail-countdown"><div class="cd-head"><span class="cd-title">Last Date — ' + fmtDate(u.lastDate) + '</span><span class="alert-tag soon" id="cd-tag"></span></div>' +
+            '<div class="cd-days"><b id="cd-d">–</b><span id="cd-days-label">days remaining</span></div></div>';
         }
         h += '<div class="notice-body">' + linkify(u.content || u.summary || "") + "</div>";
         if (u.source || u.disclaimer) {
@@ -1948,8 +1948,11 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
 
         document.getElementById("view-home").classList.remove("hidden");
         document.title = DEFAULT_TITLE;
-        /* The page opens at the TOP: no anchor scrolling on load, ever.
-           Scrolling happens only on an explicit navigation click below. */
+        /* The page opens at the TOP by default: no anchor scrolling on
+           load — the one exception, the #important-deadlines direct
+           link, is applied deliberately right after route() runs below.
+           Scrolling otherwise happens only on an explicit navigation
+           click below. */
         window.scrollTo(0, 0);
       }
       function navigateTo(url, anchorId) {
@@ -1999,25 +2002,60 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
       }
       var openExamsSection = wireCollapse("exam-toggle", "exam-panel");
       var openResultsSection = wireCollapse("results-toggle", "results-panel");
+      /* Important Deadlines highlight: #important-deadlines direct link
+         se aane par section kuch der ke liye peela-highlight hota hai,
+         taaki aankh seedha wahi pade. */
+      var deadlinesHighlightTimer = null;
+      function highlightDeadlines() {
+        var el = document.getElementById("important-deadlines");
+        if (!el || el.classList.contains("hidden")) return;
+        if (el.classList.contains("reveal")) el.classList.add("is-visible");
+        el.classList.remove("is-highlight");
+        void el.offsetWidth;
+        el.classList.add("is-highlight");
+        if (deadlinesHighlightTimer) clearTimeout(deadlinesHighlightTimer);
+        deadlinesHighlightTimer = setTimeout(function () { el.classList.remove("is-highlight"); }, 2800);
+      }
       function openAnchorSection(anchorId) {
         if (anchorId === "upcoming-exam" && openExamsSection) openExamsSection(true);
         if (anchorId === "results" && openResultsSection) openResultsSection(true);
+        if (anchorId === "important-deadlines") highlightDeadlines();
       }
       if ((location.hash || "") === "#upcoming-exam" && openExamsSection) openExamsSection(true);
       if ((location.hash || "") === "#results" && openResultsSection) openResultsSection(true);
+      if ((location.hash || "") === "#important-deadlines") highlightDeadlines();
       window.addEventListener("hashchange", function () {
         var h = location.hash || "";
-        if (h === "#upcoming-exam" || h === "#results") {
+        if (h === "#upcoming-exam" || h === "#results" || h === "#important-deadlines") {
           openAnchorSection(h.slice(1));
           var s = document.getElementById(h.slice(1));
           if (s) s.scrollIntoView();
         }
       });
       route(true);
+      /* Direct link https://wazirganjcollege.vercel.app/#important-deadlines
+         se aane par: route() page ko upar le jata hai, isliye yahan
+         seedha Important Deadlines par scroll + highlight karte hain. */
+      if ((location.hash || "") === "#important-deadlines") {
+        openAnchorSection("important-deadlines");
+        var dlEl = document.getElementById("important-deadlines");
+        if (dlEl) dlEl.scrollIntoView();
+      }
       /* Re-assert the top once everything has loaded, in case the browser
-         tried to jump to a #fragment while the page was loading. */
+         tried to jump to a #fragment while the page was loading — lekin
+         jaane-maane anchor links (#important-deadlines, #results,
+         #upcoming-exam) par wahi section dikhana hai, upar nahi. */
       window.addEventListener("load", function () {
-        if ((location.hash || "").indexOf("#/") !== 0) window.scrollTo(0, 0);
+        var h = location.hash || "";
+        if (h.indexOf("#/") === 0) return;
+        if (h === "#important-deadlines") {
+          openAnchorSection("important-deadlines");
+          var dlEl2 = document.getElementById("important-deadlines");
+          if (dlEl2) dlEl2.scrollIntoView();
+          return;
+        }
+        if (h === "#results" || h === "#upcoming-exam") return;
+        window.scrollTo(0, 0);
       });
     </script>
     <script>
