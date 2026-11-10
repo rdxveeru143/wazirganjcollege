@@ -731,18 +731,36 @@
         .btn-print:hover { background: var(--surface-alt); color: var(--text); }
       }
       /* Cafe printout: header / nav / footer nahi chhapte,
-         sirf khule hue guide page ki details saaf-saaf aati hain. */
+         sirf khule hue guide page ki details saaf-saaf aati hain.
+         Poora guide page EK hi A4 page par fit ho — isliye print me
+         spacing aur font compact rakhe hain, checklist hamesha
+         2 columns me chhapti hai, aur neeche ke print footer
+         (watermark + WhatsApp QR) ke liye jagah reserve rehti hai. */
+      @page { size: A4 portrait; margin: 10mm 12mm; }
       @media print {
         header.site, footer.site, .backlink, .guide-actions { display: none !important; }
-        body { font-size: 12.5pt; }
+        body { font-size: 10.5pt; line-height: 1.4; }
         main.wrap { max-width: none; padding: 0; }
         .guide { max-width: none; }
-        .portal-banner { background: #fff; color: #000; border: 1.5px solid #000; box-shadow: none; margin-top: 0; }
-        .portal-banner h2 { color: #000; }
-        .portal-banner p { color: #222; }
+        .portal-banner { background: #fff; color: #000; border: 1.5px solid #000; box-shadow: none; margin-top: 0; padding: 10px 14px; border-radius: 8px; }
+        .portal-banner h2 { color: #000; font-size: 15pt; margin-bottom: 3px; }
+        .portal-banner p { color: #222; font-size: 10pt; margin-bottom: 0; }
         .portal-banner .btn { display: none !important; }
-        .portal-banner .portal-url { color: #000; margin-top: 0; }
-        .guide-card { box-shadow: none; border: 1px solid #999; }
+        .portal-banner .portal-url { color: #000; margin-top: 4px; font-size: 9.5pt; }
+        .guide-card { box-shadow: none; border: 1px solid #999; margin-top: 10px; padding: 12px 14px; border-radius: 8px; }
+        .guide-card > p.intro { font-size: 10pt; }
+        .guide-sec { margin-top: 12px; }
+        .guide-sec h2 { font-size: 12pt; margin-bottom: 4px; }
+        .guide-sec > p { font-size: 10pt; margin-bottom: 6px; }
+        .check-list { grid-template-columns: 1fr 1fr; gap: 5px; }
+        .check-list li { padding: 5px 8px; font-size: 9.5pt; line-height: 1.35; border-radius: 6px; gap: 7px; }
+        .check-list .ck { width: 16px; height: 16px; margin-top: 0; }
+        .check-list .ck svg { width: 10px; height: 10px; }
+        .login-box { padding: 2px 12px; border-radius: 8px; }
+        .login-row { padding: 5px 0; font-size: 10pt; }
+        .login-row .lx { font-size: 9.5pt; }
+        .rule-box { padding: 8px 10px; font-size: 9.5pt; line-height: 1.45; border-radius: 8px; margin-top: 12px !important; }
+        .guide-notes { font-size: 10pt; gap: 3px; }
         .check-list li, .login-box, .rule-box { break-inside: avoid; }
       }
 
@@ -923,33 +941,68 @@
         body.printing .docs-note { border: 1px solid #000 !important; background: #fff !important; }
       }
 
-      /* ---------- Print footer: brand watermark + WhatsApp QR ----------
-         Screen par kabhi nahi dikhta. Print button se print karne par
-         (checklist cards ya /admission, /exam-form pages) har printout ke
-         neeche brand text, WhatsApp QR aur join line aati hai, aur page ke
-         beech me halka watermark bhi rehta hai. */
-      .print-footer, .print-watermark { display: none; }
+      /* ---------- Print branding: anti-crop watermark + WhatsApp QR ----------
+         Screen par kabhi nahi dikhta. Print karne par watermark kisi alag
+         neeche-wali strip me NAHI aata — wo poore page par content ke
+         upar-neeche baar-baar diagonal chhapta hai, aur brand + QR guide
+         card ke ANDAR (content ke beech) bhi aata hai. Isliye cafe par
+         neeche se kaat kar watermark hataya nahi ja sakta, aur kaata hua
+         tukda chipkane layak koi saaf strip banti hi nahi — jahan se bhi
+         page katega, watermark aur content dono saath katenge. */
+      .print-footer, .print-watermark, .print-inline-brand { display: none; }
       @media print {
+        /* Poore page par repeat hone wala diagonal watermark layer:
+           upar se neeche tak 5 rows, kinare se kinare tak faila hua,
+           taaki koi bhi hissa kaatne par baaki page par watermark bane rahe. */
         .print-watermark {
-          display: block; position: fixed; top: 42%; left: 0; right: 0;
-          text-align: center; transform: rotate(-24deg);
-          font-size: 44pt; font-weight: 800; letter-spacing: 1px;
-          color: rgba(20, 38, 76, .07); z-index: 0; pointer-events: none;
+          display: flex; flex-direction: column; justify-content: space-between;
+          position: fixed; top: -6%; bottom: -6%; left: -14%; right: -14%;
+          z-index: 0; pointer-events: none; overflow: hidden;
         }
+        .print-watermark span {
+          display: block; text-align: center; white-space: nowrap;
+          transform: rotate(-24deg);
+          font-size: 30pt; font-weight: 800; letter-spacing: 1px;
+          color: rgba(20, 38, 76, .08); line-height: 1.1;
+        }
+        /* Fixed footer ab koi alag strip nahi hai: na upar koi cut-line
+           (border) hai, na safed patti (background). Ye page ke content
+           wale hisse ke ANDAR, aakhri content ke upar overlap karke
+           chhapta hai — neeche ka margin kaatne se ye nahi hat ta, aur
+           ise kaatna matlab content kaatna hai. */
         .print-footer {
-          display: flex; align-items: center; gap: 14px;
-          position: fixed; bottom: 0; left: 0; right: 0;
-          border-top: 2px solid #14264c; padding: 10px 4px 2px;
-          background: #fff; z-index: 1;
+          display: flex; align-items: center; gap: 10px;
+          position: fixed; bottom: 16mm; left: 6mm; right: 6mm;
+          background: transparent; z-index: 1;
         }
         .print-footer .pf-brand { flex: 1 1 auto; min-width: 0; }
-        .print-footer .pf-name { display: block; font-size: 14pt; font-weight: 800; color: #14264c; line-height: 1.2; }
-        .print-footer .pf-slogan { display: block; font-size: 9.5pt; font-weight: 700; color: #5b6a85; letter-spacing: .4px; }
+        .print-footer .pf-name { display: block; font-size: 11pt; font-weight: 800; color: rgba(20, 38, 76, .78); line-height: 1.2; }
+        .print-footer .pf-slogan { display: block; font-size: 8pt; font-weight: 700; color: rgba(91, 106, 133, .85); letter-spacing: .4px; }
         .print-footer .pf-join { text-align: right; flex: none; }
-        .print-footer .pf-join b { display: block; font-size: 11.5pt; color: #178a44; line-height: 1.25; }
-        .print-footer .pf-join span { display: block; font-size: 8.5pt; color: #444; word-break: break-all; }
-        .print-footer img.pf-qr { width: 74px; height: 74px; flex: none; }
-        body { padding-bottom: 96px; }
+        .print-footer .pf-join b { display: block; font-size: 10pt; color: rgba(23, 138, 68, .9); line-height: 1.25; }
+        .print-footer .pf-join span { display: block; font-size: 7.5pt; color: rgba(68, 68, 68, .85); word-break: break-all; }
+        .print-footer img.pf-qr { width: 52px; height: 52px; flex: none; background: #fff; padding: 3px; }
+        /* Guide pages par card ke andar wala brand + QR hi kaafi hai —
+           wahan fixed wala brand alag se nahi chhapta, warna dono ek hi
+           jagah par overlap ho jayenge. Doosri views (notice detail
+           waghera) par fixed wala hi aata hai. */
+        main:has(> #view-admission:not(.hidden)) ~ .print-footer,
+        main:has(> #view-examform:not(.hidden)) ~ .print-footer { display: none !important; }
+        /* Guide card ke andar wala brand + QR: card ki border ke andar,
+           content ke theek neeche chhapta hai — card ke bahar ki koi bhi
+           cutting ise alag nahi kar sakti. */
+        .print-inline-brand {
+          display: flex; align-items: center; gap: 10px;
+          margin-top: 12px;
+        }
+        .print-inline-brand .pf-brand { flex: 1 1 auto; min-width: 0; }
+        .print-inline-brand .pf-name { display: block; font-size: 11pt; font-weight: 800; color: #14264c; line-height: 1.2; }
+        .print-inline-brand .pf-slogan { display: block; font-size: 8pt; font-weight: 700; color: #5b6a85; letter-spacing: .4px; }
+        .print-inline-brand .pf-join { text-align: right; flex: none; }
+        .print-inline-brand .pf-join b { display: block; font-size: 10pt; color: #178a44; line-height: 1.25; }
+        .print-inline-brand .pf-join span { display: block; font-size: 7.5pt; color: #444; word-break: break-all; }
+        .print-inline-brand img.pf-qr { width: 50px; height: 50px; flex: none; }
+        body { padding-bottom: 30px; }
       }
     </style>
     <script>
@@ -1280,6 +1333,18 @@
 
             <p style="margin:16px 0 0;font-size:.96rem;line-height:1.6;color:var(--dim)"><b style="color:var(--navy)">Note:</b> Fill only the required information. Last date is as per each session's college notice — check the latest notice on the website before going.</p>
 
+            <div class="print-inline-brand" aria-hidden="true">
+              <div class="pf-brand">
+                <span class="pf-name">Wazirganj College Updates</span>
+                <span class="pf-slogan">Stay informed Stay ahead</span>
+              </div>
+              <div class="pf-join">
+                <b>Join our WhatsApp Channel</b>
+                <span>whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q</span>
+              </div>
+              <img class="pf-qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQMAAACXljzdAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB1ElEQVRYhc2Xva3DMAyEabhIqRE8ShYLbAVZzKN4BJUuhDB3pBI8D/AkqhGkzwXNnyMl0mklxSoyl031VaTKKotfdSNZcH2fy8SzzpplsasI5GnWimzngh3WyvLCF3HIXct605y0ynQGI4iyMMr7XFaJQzzaNb2Z/7AeVl/y4P+JJT7ybb0dj7TX9DwvVTKStKWajdBv1zWQ0GrEsNKztFo2NetDEFiLKH/1bdY3aoJRD0Ca1pq+1aSojdOtD0DMkwyu65tVy0Pu0o/IpMdGZaWKIe/KdsJ5ewxi9ammYlXcj/ZFAJIUmgENUdc31IRZb1UymtCjrAVqyMaODn2rv2iPJcxERNt27wsW/dqRoDfmhPxqSsHeiLOWCASqZXMilCKzW05WC7R6OMF8Q1dCYTnn7Gpq1qI9nJhm6Oyz2M5mfsw+/wwniPYBrf1qiF7yYDg5OZIh6tQ115DqnakXgUKgM1Ep6DOrCUzTEoI8ebFTQ5bKmPq5zddjia827yhJy78ApM3Xprl/6rVKBGKiZvW6UOdUzWrpSPzdaK8PSa5iam/bMMTe2ZU/gC9+KhaDcN6BeqnvPlOMJ7m9djPnHXR2uf3UZTjxWvA3AA/WDaRGIJ3WBxUO5qz9NiYKAAAAAElFTkSuQmCC" alt="" />
+            </div>
+
             <div class="guide-actions">
               <a class="btn btn-navy" href="https://wazirganjcollege.edmitr.in/" target="_blank" rel="noreferrer">Admission Portal <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg></a>
               <button type="button" class="btn btn-print js-print">Print this page <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></button>
@@ -1339,6 +1404,18 @@
               </ul>
             </section>
 
+            <div class="print-inline-brand" aria-hidden="true">
+              <div class="pf-brand">
+                <span class="pf-name">Wazirganj College Updates</span>
+                <span class="pf-slogan">Stay informed Stay ahead</span>
+              </div>
+              <div class="pf-join">
+                <b>Join our WhatsApp Channel</b>
+                <span>whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q</span>
+              </div>
+              <img class="pf-qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQMAAACXljzdAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB1ElEQVRYhc2Xva3DMAyEabhIqRE8ShYLbAVZzKN4BJUuhDB3pBI8D/AkqhGkzwXNnyMl0mklxSoyl031VaTKKotfdSNZcH2fy8SzzpplsasI5GnWimzngh3WyvLCF3HIXct605y0ynQGI4iyMMr7XFaJQzzaNb2Z/7AeVl/y4P+JJT7ybb0dj7TX9DwvVTKStKWajdBv1zWQ0GrEsNKztFo2NetDEFiLKH/1bdY3aoJRD0Ca1pq+1aSojdOtD0DMkwyu65tVy0Pu0o/IpMdGZaWKIe/KdsJ5ewxi9ammYlXcj/ZFAJIUmgENUdc31IRZb1UymtCjrAVqyMaODn2rv2iPJcxERNt27wsW/dqRoDfmhPxqSsHeiLOWCASqZXMilCKzW05WC7R6OMF8Q1dCYTnn7Gpq1qI9nJhm6Oyz2M5mfsw+/wwniPYBrf1qiF7yYDg5OZIh6tQ115DqnakXgUKgM1Ep6DOrCUzTEoI8ebFTQ5bKmPq5zddjia827yhJy78ApM3Xprl/6rVKBGKiZvW6UOdUzWrpSPzdaK8PSa5iam/bMMTe2ZU/gC9+KhaDcN6BeqnvPlOMJ7m9djPnHXR2uf3UZTjxWvA3AA/WDaRGIJ3WBxUO5qz9NiYKAAAAAElFTkSuQmCC" alt="" />
+            </div>
+
             <div class="guide-actions">
               <a class="btn btn-navy" href="https://www.magadhonline.in/student/dashboard" target="_blank" rel="noreferrer">Open Student Dashboard <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg></a>
               <button type="button" class="btn btn-print js-print">Print this page <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></button>
@@ -1349,7 +1426,7 @@
 
     </main>
 
-    <div class="print-watermark" aria-hidden="true">Wazirganj College Updates</div>
+    <div class="print-watermark" aria-hidden="true"><span>Wazirganj College Updates</span><span>Wazirganj College Updates</span><span>Wazirganj College Updates</span><span>Wazirganj College Updates</span><span>Wazirganj College Updates</span></div>
     <div class="print-footer" aria-hidden="true">
       <div class="pf-brand">
         <span class="pf-name">Wazirganj College Updates</span>
