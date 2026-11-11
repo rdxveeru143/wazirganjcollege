@@ -39,7 +39,7 @@
         var path = window.location.pathname || "/";
         path = path.replace(/\/index\.html?$/i, "/");
         var parts = path.split("/").filter(function (s) { return s.length > 0; });
-        var keys = ["2023-27", "2024-28", "2025-29", "2026-30", "general", "admission", "exam-form", "deadlines"];
+        var keys = ["2023-27", "2024-28", "2025-29", "2026-30", "admission", "exam-form", "deadlines", "result"];
         if (parts.length >= 2 && parts[parts.length - 2] === "update") parts.length -= 2;
         else if (parts.length && keys.indexOf(parts[parts.length - 1]) !== -1) parts.length -= 1;
         var base = document.createElement("base");
@@ -77,7 +77,7 @@
         { "@type": "Question", "name": "What is the last date for the Sem-III (2025-29) exam form?", "acceptedAnswer": { "@type": "Answer", "text": "The last date for the Sem-III (U.G. Session 2025-29) exam form is 14/11/2026." } },
         { "@type": "Question", "name": "What is the last date for the Sem-V (2024-28) exam form?", "acceptedAnswer": { "@type": "Answer", "text": "The last date for the Sem-V (U.G. Session 2024-28) exam form is 17/11/2026." } },
         { "@type": "Question", "name": "What is the last date for the Sem-VII (2023-27) exam form?", "acceptedAnswer": { "@type": "Answer", "text": "The last date for the Sem-VII (U.G. Session 2023-27) exam form is 19/11/2026. University portal abhi khula nahi hai — portal khulte hi suchit kiya jayega; abhi sirf Sem-V aur Sem-III ke form bhare ja rahe hain." } },
-        { "@type": "Question", "name": "Where can I check my Magadh University result and download my marksheet?", "acceptedAnswer": { "@type": "Answer", "text": "Magadh University result portal (Result / Marksheet section). Registration No. and Exam Roll No. required." } },
+        { "@type": "Question", "name": "Where can I check my Magadh University result and download my marksheet?", "acceptedAnswer": { "@type": "Answer", "text": "Magadh University result portal — Result / Marksheet links are given on each U.G. Session page. Registration No. and Exam Roll No. required." } },
         { "@type": "Question", "name": "How do I apply for admission to Wazirganj College?", "acceptedAnswer": { "@type": "Answer", "text": "EdMitr admission portal: wazirganjcollege.edmitr.in." } }
       ]
     }
@@ -432,7 +432,18 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      #view-detail:not(.hidden), #view-session:not(.hidden), #view-admission:not(.hidden), #view-examform:not(.hidden), #view-deadlines:not(.hidden) { animation: viewIn .45s ease both; }
+      #view-detail:not(.hidden), #view-session:not(.hidden), #view-admission:not(.hidden), #view-examform:not(.hidden), #view-deadlines:not(.hidden), #view-result:not(.hidden) { animation: viewIn .45s ease both; }
+      /* Result page (/result): session-wise groups ek-ek karke
+         fade-and-slide-in hote hain jab page khulta hai, aur har
+         link-item par maujooda hover lift rehta hai — page static
+         nahi lagta. */
+      .result-group { margin-bottom: 18px; }
+      .result-group:last-child { margin-bottom: 0; }
+      .result-group h3 { margin: 0 0 10px; font-size: 1.08rem; }
+      #view-result:not(.hidden) .result-group { animation: viewIn .55s cubic-bezier(.22,.61,.36,1) both; }
+      #view-result:not(.hidden) .result-group:nth-child(2) { animation-delay: .07s; }
+      #view-result:not(.hidden) .result-group:nth-child(3) { animation-delay: .14s; }
+      #view-result:not(.hidden) .result-group:nth-child(4) { animation-delay: .21s; }
       /* Noticeable pulse on the Important Deadlines alert badge */
       @keyframes pulse-soft {
         0%, 100% { transform: scale(1); opacity: 1; box-shadow: 0 0 0 0 rgba(192, 39, 45, .45); }
@@ -441,7 +452,7 @@
       .alert-tag { animation: pulse-soft 1.8s ease-in-out infinite; }
       .alert-tag.blink { animation: blink 1.1s steps(2, start) infinite, pulse-soft 1.3s ease-in-out infinite; }
       @media (prefers-reduced-motion: reduce) {
-        .blink, .alert-tag, .alert-tag.blink, #view-detail:not(.hidden), #view-session:not(.hidden), #view-admission:not(.hidden), #view-examform:not(.hidden), #view-deadlines:not(.hidden), .hero-in { animation: none; }
+        .blink, .alert-tag, .alert-tag.blink, #view-detail:not(.hidden), #view-session:not(.hidden), #view-admission:not(.hidden), #view-examform:not(.hidden), #view-deadlines:not(.hidden), #view-result:not(.hidden), #view-result:not(.hidden) .result-group, .hero-in { animation: none; }
         html { scroll-behavior: auto; }
         .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
         .card:hover, .link-item:hover, .tile:hover, .portal-btns a:hover, .session-tile:hover,
@@ -449,7 +460,7 @@
         *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
       }
 
-      /* ---------- Home: 4 session columns + General special ---------- */
+      /* ---------- Home: 4 session columns (General notices har column me) ---------- */
       .home-sessions-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
       .session-col {
         background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
@@ -510,26 +521,6 @@
         .home-sessions-grid .session-col { display: none; }
         .home-sessions-grid .session-col.mobile-active { display: flex; }
       }
-      /* General — special, alag section */
-      .general-special {
-        background: var(--surface); border: 2px solid var(--yellow); border-radius: 14px;
-        padding: 18px; box-shadow: var(--shadow);
-      }
-      .general-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
-      .general-head-text h2 { margin: 4px 0 4px; font-size: 1.4rem; color: var(--navy); line-height: 1.2; }
-      .general-head-text p { margin: 0; color: var(--dim); font-size: .92rem; max-width: 62ch; }
-      .general-kicker {
-        display: inline-block; font-size: .7rem; font-weight: 800; letter-spacing: .7px; text-transform: uppercase;
-        background: var(--navy); color: #fff; border-radius: 999px; padding: 4px 9px;
-      }
-      .general-grid { align-items: stretch; }
-      .general-title-link { color: inherit; text-decoration: none; }
-      .general-title-link .gen-arrow { color: var(--red); }
-      .general-title-link:hover, .general-title-link:focus-visible { color: var(--red); text-decoration: underline; }
-      @media (min-width: 1024px) {
-        .general-special { padding: 22px 24px; }
-        .general-head-text h2 { font-size: 1.55rem; }
-      }
 
       /* ---------- Browse by session (home) ---------- */
       .session-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); gap: 12px; }
@@ -588,7 +579,7 @@
       .link-item .li-main span { font-size: .85rem; color: var(--dim); }
       .link-item .btn { flex: none; }
 
-      /* ---------- Collapsible sections (Upcoming Exams, Result / Marksheet) ----------
+      /* ---------- Collapsible section (Upcoming Exams) ----------
          On the home page both sections stay closed: only the heading bar
          shows. The panel opens on click/tap of the heading. */
       .collapse-toggle {
@@ -741,15 +732,11 @@
       .guide-notes { margin: 0; padding-left: 20px; font-size: .96rem; display: flex; flex-direction: column; gap: 6px; }
       .guide-notes b { color: var(--navy); }
       .guide-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 22px; }
-      /* Print this page button — live site par real browser me print
-         dialog kholta hai; printout me watermark + WhatsApp QR footer
-         neeche wali @media print rules se aata hai. */
-      .btn-print { background: var(--surface); color: var(--navy); border: 2px solid var(--navy); }
-      .btn-print:hover { background: var(--navy); color: #fff; }
-      @media (prefers-color-scheme: dark) {
-        .btn-print { color: var(--text); border-color: var(--dim); }
-        .btn-print:hover { background: var(--surface-alt); color: var(--text); }
+      .btn-print {
+        background: var(--surface); color: var(--navy); border: 2px solid var(--navy);
       }
+      .btn-print:hover { background: var(--navy); color: #fff; }
+      .btn-print:focus-visible { outline: 3px solid rgba(34, 158, 217, .55); outline-offset: 2px; }
       /* Cafe printout: header / nav / footer nahi chhapte,
          sirf khule hue guide page ki details saaf-saaf aati hain.
          Poora guide page EK hi A4 page par fit ho — isliye print me
@@ -927,9 +914,6 @@
         .session-tile { padding: 20px; }
         .session-tile b { font-size: 1.1rem; }
 
-        /* Results: the four session groups side by side, two by two */
-        #results-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 30px; align-items: start; }
-        #results-groups .link-list { grid-template-columns: 1fr; }
         .link-group h3 { font-size: 1.15rem; }
         .link-item { padding: 15px 17px; }
 
@@ -1074,28 +1058,13 @@
         body { padding-bottom: 30px; }
       }
 
-      /* ---------- View version switch (Desktop / Mobile) ----------
-         Header me toggle hai: user khud version chun sakta hai.
-         Default (koi button nahi dabaya) = pehle jaisa responsive —
-         screen ke hisab se khud badalta hai. Button dabane par wahi
-         version LOCK ho jata hai: Desktop = full/wide desktop layout
-         (phone par bhi chaudi multi-column view), Mobile = phone-
-         optimized layout (badi screen par bhi ek column, 440px ki
-         phone-chaudi me simta hua). Choice sirf is session ke liye
-         memory me rehti hai, kahin save nahi hoti. */
-      .view-switch {
-        display: inline-flex; flex: none; gap: 3px; padding: 3px;
-        background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.32);
-        border-radius: 999px;
-      }
-      .view-switch button {
-        border: none; cursor: pointer; font: inherit; font-size: .82rem; font-weight: 700;
-        min-height: 32px; padding: 5px 13px; border-radius: 999px;
-        background: transparent; color: #fff; white-space: nowrap;
-      }
-      .view-switch button.is-active { background: var(--yellow); color: var(--navy-deep); }
-      .view-switch button:focus-visible { outline: 3px solid rgba(34, 158, 217, .65); outline-offset: 1px; }
-      @media (max-width: 560px) { .view-switch button { font-size: .78rem; padding: 5px 10px; min-height: 30px; } }
+      /* ---------- View — auto-detect only (toggle hidden) ----------
+         Header me koi Desktop/Mobile toggle NAHI dikhta. View khud
+         device ke hisab se switch hota hai: mobile device / chhoti
+         screen par mobile view, desktop / badi screen par desktop
+         view — CSS media queries + neeche wali auto-detect script
+         se. User ko switch karne ki zaroorat nahi. */
+      .view-switch { display: none !important; }
       /* Chhoti screen par header ki row aur tiles card ke andar hi
          rahein — toggle ke baad jagah kam padti hai, isliye icons
          thode chhote, actions saaf wrap, aur tiles compact. */
@@ -1119,7 +1088,6 @@
       body.force-mobile .exam-grid { grid-template-columns: 1fr; }
       body.force-mobile .session-grid { grid-template-columns: repeat(2, 1fr); }
       body.force-mobile .link-list { grid-template-columns: 1fr; }
-      body.force-mobile #results-groups { display: grid; grid-template-columns: 1fr; }
       body.force-mobile #dl-list { display: grid; grid-template-columns: 1fr; }
       body.force-mobile .home-sessions-grid { grid-template-columns: 1fr; }
       body.force-mobile .session-tabs { display: grid; }
@@ -1140,8 +1108,6 @@
       body.force-desktop .exam-grid { grid-template-columns: repeat(3, 1fr); }
       body.force-desktop .session-grid { grid-template-columns: repeat(5, 1fr); }
       body.force-desktop .link-list { grid-template-columns: repeat(2, 1fr); }
-      body.force-desktop #results-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 30px; align-items: start; }
-      body.force-desktop #results-groups .link-list { grid-template-columns: 1fr; }
       body.force-desktop .home-sessions-grid { grid-template-columns: repeat(4, 1fr); }
       body.force-desktop .session-tabs { display: none; }
       body.force-desktop .home-sessions-grid .session-col { display: flex; }
@@ -1178,10 +1144,6 @@
           </span>
         </a>
         <div class="header-actions hero-in d1">
-          <div class="view-switch" role="group" aria-label="View version — Desktop ya Mobile">
-            <button type="button" id="view-btn-desktop" aria-pressed="false">Desktop</button>
-            <button type="button" id="view-btn-mobile" aria-pressed="false">Mobile</button>
-          </div>
           <button type="button" class="search-toggle" id="search-toggle" aria-label="Search notices" aria-expanded="false" aria-controls="header-search">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
           </button>
@@ -1235,9 +1197,9 @@
               <span class="tic" style="background:var(--navy)"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 2h9l5 5v15H6V2zm7 1.5V8h4.5L13 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/></svg></span>
               <span><b>Fill Exam Form</b></span>
             </a>
-            <a class="tile" href="/#results">
-              <span class="tic" style="background:var(--red)"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zM7.5 18a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0-5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm0-5A1.5 1.5 0 1 1 7.5 5a1.5 1.5 0 0 1 0 3zM18 17H10v-2h8v2zm0-4h-8v-2h8v2zm0-4H10V7h8v2z"/></svg></span>
-              <span><b>Result / Marksheet</b></span>
+            <a class="tile" href="/result">
+              <span class="tic" style="background:var(--red)"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z"/></svg></span>
+              <span><b>Result Marksheet</b></span>
             </a>
             <a class="tile" href="/#upcoming-exam">
               <span class="tic" style="background:var(--blue)"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg></span>
@@ -1250,7 +1212,6 @@
           <section class="block" id="important-deadlines" aria-labelledby="dl-h">
             <div class="deadlines">
               <h2 id="dl-h"><a class="dl-heading-link" href="/deadlines">Important Deadlines</a></h2>
-              <p class="lead">Direct link: <a class="dl-direct-link" href="/deadlines">wazirganjcollege.vercel.app/deadlines</a></p>
               <div id="dl-list"></div>
             </div>
           </section>
@@ -1267,28 +1228,7 @@
             </div>
             <div class="home-sessions-grid" id="home-sessions-grid"></div>
           </section>
-
-          <section class="block general-special" aria-labelledby="general-h">
-            <div class="general-head">
-              <div class="general-head-text">
-                <span class="general-kicker">Special Section</span>
-                <h2 id="general-h"><a class="general-title-link" href="/general">General Notices <span class="gen-arrow" aria-hidden="true">→</span></a></h2>
-                <p>Common notices for all sessions — holidays, guides and general college information</p>
-              </div>
-            </div>
-            <div class="grid general-grid" id="general-grid"></div>
-          </section>
         </div>
-
-        <section class="block" id="results" aria-labelledby="results-h">
-          <button type="button" class="collapse-toggle" id="results-toggle" aria-expanded="false" aria-controls="results-panel">
-            <span class="collapse-toggle-title" id="results-h">Result / Marksheet</span>
-            <span class="collapse-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.41 8.59 12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg></span>
-          </button>
-          <div class="collapse-panel" id="results-panel" hidden>
-            <div id="results-groups"></div>
-          </div>
-        </section>
 
         <section class="block" id="upcoming-exam" aria-labelledby="exam-h">
           <button type="button" class="collapse-toggle" id="exam-toggle" aria-expanded="false" aria-controls="exam-panel">
@@ -1404,7 +1344,7 @@
             </article>
             <article class="faq-card">
               <h3>Where can I check my Magadh University result and download my marksheet?</h3>
-              <p><a href="/#results">Result / Marksheet</a> — Magadh University result portal. Registration No. and Exam Roll No. required.</p>
+              <p>Magadh University result portal — Result / Marksheet links are given on your U.G. Session page. Registration No. and Exam Roll No. required.</p>
             </article>
             <article class="faq-card">
               <h3>How do I apply for admission to Wazirganj College?</h3>
@@ -1509,7 +1449,7 @@
 
             <div class="guide-actions">
               <a class="btn btn-navy" href="https://wazirganjcollege.edmitr.in/" target="_blank" rel="noreferrer">Admission Portal <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg></a>
-              <button type="button" class="btn btn-print js-print">Print this page <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></button>
+              <button type="button" class="btn btn-print"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg> Print this page</button>
             </div>
           </div>
         </div>
@@ -1580,7 +1520,7 @@
 
             <div class="guide-actions">
               <a class="btn btn-navy" href="https://www.magadhonline.in/student/dashboard" target="_blank" rel="noreferrer">Open Student Dashboard <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg></a>
-              <button type="button" class="btn btn-print js-print">Print this page <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></button>
+              <button type="button" class="btn btn-print"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg> Print this page</button>
             </div>
           </div>
         </div>
@@ -1592,9 +1532,24 @@
         <section class="block" aria-labelledby="dl-page-h" style="margin-top:16px">
           <div class="deadlines">
             <h2 id="dl-page-h">Important Deadlines</h2>
-            <p class="lead">Direct link: <a class="dl-direct-link" href="/deadlines">wazirganjcollege.vercel.app/deadlines</a></p>
             <div id="dl-list-page"></div>
           </div>
+        </section>
+      </div>
+
+      <!-- ================= RESULT VIEW (/result) =================
+           Dedicated Result / Marksheet page — Home ke Student Services
+           me "Result Marksheet" tile yahi kholta hai, bilkul "Apply for
+           Admission" tile ke /admission page ki tarah. Home par koi
+           alag Result/Marksheet section nahi hai; session-wise official
+           result/marksheet links (LINKS data) neeche JS se bhare jate
+           hain. -->
+      <div id="view-result" class="hidden">
+        <a class="backlink" href="/">← Back to Home</a>
+        <section class="block" aria-labelledby="result-h" style="margin-top:16px">
+          <div class="sec-head"><h2 id="result-h">Result / Marksheet</h2></div>
+          <p class="exam-note">Magadh University semester results and marksheets — official portal links for every U.G. session. Registration No. and Exam Roll No. are required to check a result or download a marksheet.</p>
+          <div id="result-groups"></div>
         </section>
       </div>
 
@@ -1679,18 +1634,21 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
       function sessionPretty(key) { return key.replace(/-/g, "–"); }
       function sessionBadgeHTML(u) {
         var key = sessionKeyOf(u);
-        var label = key === "general" ? "General" : "U.G. Session " + sessionPretty(key);
+        /* General notices ka koi alag page nahi hai — woh Notice Board me
+           har session ke saath dikhte hain, isliye badge Home (Notice
+           Board) par le jata hai. */
+        if (key === "general") {
+          return '<a class="badge session" href="/" title="General notice — shown with every session on the Notice Board">General</a>';
+        }
+        var label = "U.G. Session " + sessionPretty(key);
         return '<a class="badge session" href="' + sessionPath(key) + '" title="View only ' + esc(label) + ' notifications">' + esc(label) + "</a>";
       }
-      function mentionsSession(u, key) {
-        var text = (u.title + " " + (u.summary || "") + " " + (u.content || "")).replace(/[–—]/g, "-");
-        return text.indexOf(key) !== -1;
-      }
       function relatedToSession(u, key) {
-        if (key === "general") return u.section === "general";
         if (sessionKeyOf(u) === key) return true;
-        /* A General notice that names this session is related to it too */
-        return u.section === "general" && mentionsSession(u, key);
+        /* General notices sab sessions ke liye hain — woh har session ke
+           Notice Board column aur har session page par dikhte hain.
+           Inke liye koi alag General page/section nahi hai. */
+        return u.section === "general";
       }
       function actionFor(u) {
         var link = u.officialLink || "";
@@ -1752,6 +1710,9 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
           else if (d <= 5) { tag = d + " days remaining"; }
           else { tag = d + " days remaining"; cls = ""; }
           var key = sessionKeyOf(u);
+          /* General notices ka koi alag page nahi — unka link Home
+             (Notice Board) par jata hai. */
+          var sessionHref = key === "general" ? "/" : sessionPath(key);
           var detail = updatePath(u.slug);
           /* Sem-VII (2023-27): date 19/11/2026 stays, but the university
              portal is not open yet (revised notice, 09/11) — status shows
@@ -1762,7 +1723,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
              student-login portal (verified per-session link), falling
              back to the notice's own official link if ever needed. */
           var portal = SESSION_PORTALS[key] || u.officialLink || "";
-          var h = '<div class="dl-row dl-clickable" data-slug="' + esc(u.slug) + '"><div class="dl-main"><b><a class="dl-title-link" href="' + detail + '">' + esc(u.title) + '</a></b><span><a class="session-link" href="' + sessionPath(key) + '">' +
+          var h = '<div class="dl-row dl-clickable" data-slug="' + esc(u.slug) + '"><div class="dl-main"><b><a class="dl-title-link" href="' + detail + '">' + esc(u.title) + '</a></b><span><a class="session-link" href="' + sessionHref + '">' +
             esc(sectionLabel(u)) + "</a>" + (isSem7 ? " · Portal abhi khula nahi hai — portal khulte hi form bharein" : (u.lastDateLabel ? " · " + esc(u.lastDateLabel) : "")) + "</span></div>";
           h += '<div class="dl-when"><span class="dl-date">' + fmtDate(u.lastDate) + '</span><span class="alert-tag' + (d <= 1 ? "" : " soon") + (cls ? " " + cls : "") + '">' + tag + '</span></div>';
           if (isSem7) h += '<a class="btn btn-navy" href="' + updatePath("sanshodhit-suchna-portal-2023-27") + '">Revised Notice dekhein</a>';
@@ -1785,7 +1746,9 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         });
       })();
 
-      /* ---------- Home: 4 session columns (latest 5 each) + General special ---------- */
+      /* ---------- Home: 4 session columns (latest 5 each) ----------
+         General notices har column me session notices ke saath hi
+         dikhte hain — Home par unka koi alag section nahi hai. */
       (function () {
         function byDateDesc(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }
         function miniHTML(u) {
@@ -1801,8 +1764,9 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         if (colsHost) {
           colsHost.innerHTML = SESSION_KEYS.map(function (key, idx) {
             /* Same rule as the session pages: a notice belongs to a session
-               if it is filed under it, or it is a General notice that names
-               that session — so the column preview matches its full page. */
+               if it is filed under it, or it is a General notice (General
+               notices sab sessions ko dikhte hain) — so the column preview
+               matches its full page. */
             var all = UPDATES.filter(function (u) { return relatedToSession(u, key); }).slice().sort(byDateDesc);
             var latest = all.slice(0, 5);
             var pretty = sessionPretty(key);
@@ -1838,35 +1802,30 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
             });
           }
         }
-        var genHost = document.getElementById("general-grid");
-        if (genHost) {
-          var genAll = UPDATES.filter(function (u) { return u.section === "general"; }).slice().sort(byDateDesc);
-          var genLatest = genAll.slice(0, 5);
-          genHost.innerHTML = genLatest.length
-            ? genLatest.map(function (u) { return cardHTML(u, false); }).join("")
-            : '<div class="empty">No general notices yet.</div>';
-        }
       })();
 
-      /* ---------- Results ---------- */
-      (function () {
-        var order = ["2023–27", "2024–28", "2025–29", "2026–30"];
-        var results = LINKS.filter(function (l) { return l.kind === "result"; });
-        document.getElementById("results-groups").innerHTML = order.map(function (s) {
-          var list = results.filter(function (l) { return l.session === s; });
-          var inner;
-          if (!list.length) {
-            inner = '<div class="empty">U.G. Session ' + s + " result is not out yet.</div>";
-          } else {
-            inner = '<div class="link-list">' + list.map(function (l) {
-              var verb = /Marksheet/.test(l.label) ? "Download Marksheet" : "Check Result";
-              return '<div class="link-item"><div class="li-main"><b>' + esc(l.label) + '</b><span>' + esc(l.note || "Official Result Portal") + '</span></div>' +
-                '<a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(l.url) + '">' + verb + " " + EXT_ICON + "</a></div>";
-            }).join("") + "</div>";
-          }
-          return '<div class="link-group"><h3>U.G. Session ' + s + "</h3>" + inner + "</div>";
-        }).join("");
-      })();
+      /* ---------- Results (session pages + dedicated /result page) ----------
+         Result / Marksheet section Home par bilkul nahi hai — na
+         heading, na collapsed panel. Ye links har session ke apne
+         page par dikhte hain (showSession me neeche judte hain),
+         sirf usi session ke result/marksheet links ke saath — aur
+         dedicated /result page par sab sessions ke ek saath
+         (resultGroupsHTML, neeche). */
+      function sessionResultsHTML(key) {
+        var pretty = sessionPretty(key);
+        var list = LINKS.filter(function (l) { return l.kind === "result" && l.session === pretty; });
+        var inner;
+        if (!list.length) {
+          inner = '<div class="empty">U.G. Session ' + esc(pretty) + " result is not out yet.</div>";
+        } else {
+          inner = '<div class="link-list">' + list.map(function (l) {
+            var verb = /Marksheet/.test(l.label) ? "Download Marksheet" : "Check Result";
+            return '<div class="link-item"><div class="li-main"><b>' + esc(l.label) + '</b><span>' + esc(l.note || "Official Result Portal") + '</span></div>' +
+              '<a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(l.url) + '">' + verb + " " + EXT_ICON + "</a></div>";
+          }).join("") + "</div>";
+        }
+        return '<section class="block" aria-labelledby="session-results-h"><div class="sec-head"><h2 id="session-results-h">Result / Marksheet</h2></div>' + inner + "</section>";
+      }
 
       /* ---------- Search ---------- */
       (function () {
@@ -1945,12 +1904,12 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         UPDATES.forEach(function (x) { if (x.slug === slug) u = x; });
         var home = document.getElementById("view-home");
         var detail = document.getElementById("view-detail");
-        if (!u) { home.classList.remove("hidden"); detail.classList.add("hidden"); document.getElementById("view-session").classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.title = DEFAULT_TITLE; return; }
+        if (!u) { home.classList.remove("hidden"); detail.classList.add("hidden"); document.getElementById("view-session").classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.getElementById("view-result").classList.add("hidden"); document.title = DEFAULT_TITLE; return; }
         var h = '<div class="badges">' + sessionBadgeHTML(u);
         if (u.important) h += '<span class="badge important">Important</span>';
         h += '<span class="badge date">' + fmtDate(u.date) + "</span></div>";
         h += "<h1>" + esc(u.title) + "</h1>";
-        h += '<p class="meta">Published on ' + fmtDate(u.date) + ' · <a href="' + sessionPath(sessionKeyOf(u)) + '">' + esc(sectionLabel(u)) + "</a></p>";
+        h += '<p class="meta">Published on ' + fmtDate(u.date) + ' · <a href="' + (sessionKeyOf(u) === "general" ? "/" : sessionPath(sessionKeyOf(u))) + '">' + esc(sectionLabel(u)) + "</a></p>";
         if (u.lastDate) {
           h += '<p class="lastdate" style="font-weight:700;color:var(--red)">Submission Deadline: ' + fmtDate(u.lastDate) + (u.lastDateLabel ? " — " + esc(u.lastDateLabel) : "") + "</p>";
           h += '<div class="countdown" id="detail-countdown"><div class="cd-days"><b id="cd-d" class="blink">–</b><span id="cd-days-label">days remaining</span></div></div>';
@@ -1974,26 +1933,27 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-admission").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
+        document.getElementById("view-result").classList.add("hidden");
 
         detail.classList.remove("hidden");
         document.title = u.title + " \u2014 Wazirganj College Updates";
         window.scrollTo(0, 0);
       }
-      /* ---------- Session view (dedicated page per session + General) ---------- */
+      /* ---------- Session view (dedicated page per session) ----------
+         General notices har session page par us session ke notices ke
+         saath dikhte hain (relatedToSession) — koi alag /general page
+         nahi hai. */
       function showSession(key) {
         var home = document.getElementById("view-home");
         var detail = document.getElementById("view-detail");
         var view = document.getElementById("view-session");
-        var valid = key === "general" || SESSION_KEYS.indexOf(key) !== -1;
-        if (!valid) { view.classList.add("hidden"); detail.classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); home.classList.remove("hidden"); return; }
-        var isGeneral = key === "general";
-        var title = isGeneral ? "General Notifications" : "U.G. Session " + sessionPretty(key);
+        var valid = SESSION_KEYS.indexOf(key) !== -1;
+        if (!valid) { view.classList.add("hidden"); detail.classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.getElementById("view-result").classList.add("hidden"); home.classList.remove("hidden"); return; }
+        var title = "U.G. Session " + sessionPretty(key);
         var list = UPDATES.filter(function (u) { return relatedToSession(u, key); });
         var h = '<div class="session-head"><div class="badges"><span class="badge session">' + esc(title) + "</span></div>";
         h += "<h1>" + esc(title) + "</h1>";
-        if (!isGeneral) {
-          h += '<div class="actions"><a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(SESSION_PORTALS[key]) + '">Fill Exam Form — Session ' + esc(sessionPretty(key)) + " " + EXT_ICON + "</a></div>";
-        }
+        h += '<div class="actions"><a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(SESSION_PORTALS[key]) + '">Fill Exam Form — Session ' + esc(sessionPretty(key)) + " " + EXT_ICON + "</a></div>";
         h += "</div>";
         if (list.length) {
           h += '<div class="grid">' + list.map(function (u) {
@@ -2008,12 +1968,16 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         } else {
           h += '<div class="empty" style="margin-top:16px">' + esc(title) + " has no notices yet.</div>";
         }
+        /* Result / Marksheet links sirf session pages par rahte hain —
+           Home par ye section bilkul nahi dikhta. */
+        h += sessionResultsHTML(key);
         document.getElementById("session-content").innerHTML = h;
         home.classList.add("hidden");
         detail.classList.add("hidden");
         document.getElementById("view-admission").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
+        document.getElementById("view-result").classList.add("hidden");
 
         view.classList.remove("hidden");
         document.title = title + " \u2014 Wazirganj College Updates";
@@ -2028,6 +1992,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
+        document.getElementById("view-result").classList.add("hidden");
         document.getElementById("view-admission").classList.toggle("hidden", page !== "admission");
         document.getElementById("view-examform").classList.toggle("hidden", page !== "exam-form");
         document.title = (page === "admission" ? "Apply for Admission" : "Fill Exam Form") + " \u2014 Wazirganj College Updates";
@@ -2044,22 +2009,68 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-session").classList.add("hidden");
         document.getElementById("view-admission").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
+        document.getElementById("view-result").classList.add("hidden");
         document.getElementById("view-deadlines").classList.remove("hidden");
         document.title = "Important Deadlines \u2014 Wazirganj College Updates";
         window.scrollTo(0, 0);
       }
-      /* ---------- Print this page (guide pages) ----------
-         Live site par real browser me window.print() print dialog kholta
-         hai; @media print rules sirf khule hue guide page ko chhapte hain,
-         watermark + WhatsApp QR footer ke saath. (Preview sandbox me
-         window.print() block hota hai — isliye button wahan kaam nahi
-         karega, lekin live site par karta hai; button isiliye rakha hai.) */
-      document.querySelectorAll(".js-print").forEach(function (btn) {
-        btn.addEventListener("click", function () { window.print(); });
+      /* ---------- Result page (/result) ----------
+         Dedicated path-based page, bilkul /admission ki tarah: Home ke
+         Student Services ki "Result Marksheet" tile yahi kholti hai.
+         Page par har U.G. session ke official result/marksheet links
+         (LINKS data, kind = result) session-wise groups me dikhte
+         hain — Home par koi Result/Marksheet section nahi hai. Har
+         open par groups dobara bante hain, taaki unki staggered
+         fade-in animation har baar chale. */
+      function resultGroupsHTML() {
+        return SESSION_KEYS.map(function (key) {
+          var pretty = sessionPretty(key);
+          var list = LINKS.filter(function (l) { return l.kind === "result" && l.session === pretty; });
+          var inner;
+          if (!list.length) {
+            inner = '<div class="empty">U.G. Session ' + esc(pretty) + " result is not out yet.</div>";
+          } else {
+            inner = '<div class="link-list">' + list.map(function (l) {
+              var verb = /Marksheet/.test(l.label) ? "Download Marksheet" : "Check Result";
+              return '<div class="link-item"><div class="li-main"><b>' + esc(l.label) + '</b><span>' + esc(l.note || "Official Result Portal") + '</span></div>' +
+                '<a class="btn btn-navy" target="_blank" rel="noreferrer" href="' + esc(l.url) + '">' + verb + " " + EXT_ICON + "</a></div>";
+            }).join("") + "</div>";
+          }
+          return '<div class="result-group"><h3>U.G. Session ' + esc(pretty) + "</h3>" + inner + "</div>";
+        }).join("");
+      }
+      function showResult() {
+        document.getElementById("result-groups").innerHTML = resultGroupsHTML();
+        document.getElementById("view-home").classList.add("hidden");
+        document.getElementById("view-detail").classList.add("hidden");
+        document.getElementById("view-session").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-examform").classList.add("hidden");
+        document.getElementById("view-deadlines").classList.add("hidden");
+        document.getElementById("view-result").classList.remove("hidden");
+        document.title = "Result / Marksheet \u2014 Wazirganj College Updates";
+        window.scrollTo(0, 0);
+      }
+      /* ---------- Printing (guide pages) ----------
+         /admission aur /exam-form par "Print this page" button hai:
+         click par window.print() chalta hai aur @media print rules
+         khule hue guide page ko full A4 par bold, clearly readable
+         chhapte hain — anti-crop watermark + WhatsApp QR ke saath.
+         Button live site par real browser me kaam karta hai (cafe
+         printouts ke liye); preview sandbox me print blocked ho sakta
+         hai, isliye button wahan bhi rakha rehta hai. */
+      document.addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest(".btn-print") : null;
+        if (!btn) return;
+        e.preventDefault();
+        window.print();
       });
       /* ---------- Path routing ----------
-         / = home; /2023-27, /2024-28, /2025-29, /2026-30 and /general =
-         session pages; /update/<slug> = a single notice. The same static
+         / = home; /2023-27, /2024-28, /2025-29, /2026-30 = session
+         pages (General notices inhi pages par har session ke saath
+         dikhte hain — koi alag /general page nahi hai, purana /general
+         link Home par khulta hai); /update/<slug> = a single notice.
+         The same static
          file is served at every path, so the route is read from
          window.location.pathname (its last segments, so the base path the
          file happens to be served under does not matter). */
@@ -2083,10 +2094,13 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         if (last === "deadlines") {
           return { type: "deadlines" };
         }
+        if (last === "result") {
+          return { type: "result" };
+        }
         if (last === "admission" || last === "exam-form") {
           return { type: "page", page: last };
         }
-        if (last === "general" || SESSION_KEYS.indexOf(last) !== -1) {
+        if (SESSION_KEYS.indexOf(last) !== -1) {
           return { type: "session", key: last };
         }
         return { type: "home" };
@@ -2112,11 +2126,13 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         if (r.type === "session") { showSession(r.key); return; }
         if (r.type === "page") { showPage(r.page); return; }
         if (r.type === "deadlines") { showDeadlines(); return; }
+        if (r.type === "result") { showResult(); return; }
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
         document.getElementById("view-admission").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
+        document.getElementById("view-result").classList.add("hidden");
 
         document.getElementById("view-home").classList.remove("hidden");
         document.title = DEFAULT_TITLE;
@@ -2155,11 +2171,13 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
           if (p !== null) { setUrl(p, true); route(false); }
         }
       });
-      /* ---------- Collapsible home sections: Upcoming Exams + Result / Marksheet ----------
-         Both stay closed on the home page — only the heading bar shows, no
-         exam photos/dates and no result links up front. Clicking the heading
-         opens/closes the panel; arriving through a /#upcoming-exam or
-         /#results link (top nav, Student Services tiles) opens it too. */
+      /* ---------- Collapsible home section: Upcoming Exams ----------
+         It stays closed on the home page — only the heading bar shows, no
+         exam photos/dates up front. Clicking the heading opens/closes the
+         panel; arriving through a /#upcoming-exam link (Student Services
+         tile) opens it too. (Result / Marksheet ka Home par koi section
+         nahi hai — woh links session pages par aur dedicated /result
+         page par hain, jo Student Services ki tile kholti hai.) */
       function wireCollapse(toggleId, panelId) {
         var toggle = document.getElementById(toggleId);
         var panel = document.getElementById(panelId);
@@ -2173,7 +2191,6 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         return setOpen;
       }
       var openExamsSection = wireCollapse("exam-toggle", "exam-panel");
-      var openResultsSection = wireCollapse("results-toggle", "results-panel");
       /* Important Deadlines highlight: #important-deadlines direct link
          se aane par section kuch der ke liye peela-highlight hota hai,
          taaki aankh seedha wahi pade. */
@@ -2190,15 +2207,13 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
       }
       function openAnchorSection(anchorId) {
         if (anchorId === "upcoming-exam" && openExamsSection) openExamsSection(true);
-        if (anchorId === "results" && openResultsSection) openResultsSection(true);
         if (anchorId === "important-deadlines") highlightDeadlines();
       }
       if ((location.hash || "") === "#upcoming-exam" && openExamsSection) openExamsSection(true);
-      if ((location.hash || "") === "#results" && openResultsSection) openResultsSection(true);
       if ((location.hash || "") === "#important-deadlines") highlightDeadlines();
       window.addEventListener("hashchange", function () {
         var h = location.hash || "";
-        if (h === "#upcoming-exam" || h === "#results" || h === "#important-deadlines") {
+        if (h === "#upcoming-exam" || h === "#important-deadlines") {
           openAnchorSection(h.slice(1));
           var s = document.getElementById(h.slice(1));
           if (s) s.scrollIntoView();
@@ -2215,8 +2230,8 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
       }
       /* Re-assert the top once everything has loaded, in case the browser
          tried to jump to a #fragment while the page was loading — lekin
-         jaane-maane anchor links (#important-deadlines, #results,
-         #upcoming-exam) par wahi section dikhana hai, upar nahi. */
+         jaane-maane anchor links (#important-deadlines, #upcoming-exam)
+         par wahi section dikhana hai, upar nahi. */
       window.addEventListener("load", function () {
         var h = location.hash || "";
         if (h.indexOf("#/") === 0) return;
@@ -2226,48 +2241,40 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
           if (dlEl2) dlEl2.scrollIntoView();
           return;
         }
-        if (h === "#results" || h === "#upcoming-exam") return;
+        if (h === "#upcoming-exam") return;
         window.scrollTo(0, 0);
       });
     </script>
     <script>
       "use strict";
-      /* ---------- View version switch (Desktop / Mobile) ----------
-         Header ke toggle se user khud version chunta hai: Desktop
-         dabane par body par force-desktop lagta hai (full/wide layout),
-         Mobile dabane par force-mobile (phone-optimized layout) — view
-         turant switch ho jata hai, page reload nahi hota aur jo page
-         khula hai wahi rehta hai. Koi choice save nahi hoti; bina dabaye
-         page pehle ki tarah screen ke hisab se responsive rehta hai,
-         aur toggle usi hisab se active version dikhata hai. */
+      /* ---------- View — auto-detect (koi toggle nahi) ----------
+         Header me Desktop/Mobile toggle hidden hai — user ko kuch
+         switch nahi karna. View device ke hisab se khud badalta hai:
+         chhoti screen / mobile device par force-mobile (phone-
+         optimized, 440px measure, stacked), badi screen / desktop
+         par force-desktop (full/wide multi-column). Screen size
+         badalne (resize / rotate) par bhi turant auto-switch hota
+         hai, bina reload ke. */
       (function () {
-        var btnD = document.getElementById("view-btn-desktop");
-        var btnM = document.getElementById("view-btn-mobile");
-        if (!btnD || !btnM) return;
-        function effective() {
-          if (document.body.classList.contains("force-desktop")) return "desktop";
-          if (document.body.classList.contains("force-mobile")) return "mobile";
-          return window.innerWidth >= 1024 ? "desktop" : "mobile";
+        function applyAutoView() {
+          var w = window.innerWidth || document.documentElement.clientWidth || 1024;
+          /* Mobile UA + touch bhi ek signal hai, lekin width hi
+             faisla karti hai taaki desktop par chhoti window bhi
+             mobile view le aur phone par bhi sahi lage. */
+          var isMobileView = w < 1024;
+          document.body.classList.toggle("force-mobile", isMobileView);
+          document.body.classList.toggle("force-desktop", !isMobileView);
+          document.body.classList.toggle("auto-mobile", isMobileView);
+          document.body.classList.toggle("auto-desktop", !isMobileView);
         }
-        function paint() {
-          var e = effective();
-          btnD.classList.toggle("is-active", e === "desktop");
-          btnM.classList.toggle("is-active", e === "mobile");
-          btnD.setAttribute("aria-pressed", e === "desktop" ? "true" : "false");
-          btnM.setAttribute("aria-pressed", e === "mobile" ? "true" : "false");
+        var raf = 0;
+        function onResize() {
+          if (raf) cancelAnimationFrame(raf);
+          raf = requestAnimationFrame(applyAutoView);
         }
-        btnD.addEventListener("click", function () {
-          document.body.classList.add("force-desktop");
-          document.body.classList.remove("force-mobile");
-          paint();
-        });
-        btnM.addEventListener("click", function () {
-          document.body.classList.add("force-mobile");
-          document.body.classList.remove("force-desktop");
-          paint();
-        });
-        window.addEventListener("resize", paint);
-        paint();
+        window.addEventListener("resize", onResize);
+        window.addEventListener("orientationchange", onResize);
+        applyAutoView();
       })();
     </script>
     <script>
