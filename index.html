@@ -1,6 +1,15 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "c7567434-2514-46dc-b62f-b37a3f9c4e85",
+        });
+      });
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
@@ -1821,10 +1830,24 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         lines.push("Join Wazirganj College Updates on WhatsApp: " + WHATSAPP_URL);
         return lines.join("\n");
       }
+      function shareNoticeBySlug(slug) {
+        var u = null;
+        for (var i = 0; i < UPDATES.length; i++) { if (UPDATES[i].slug === slug) { u = UPDATES[i]; break; } }
+        if (!u) return;
+        var text = buildShareText(u);
+        if (navigator.share) {
+          navigator.share({ title: u.title, text: text, url: SITE_URL + "/update/" + u.slug }).catch(function () {});
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { alert("Text copy ho gaya — kahi bhi paste karke share karein"); });
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand("copy"); alert("Text copy ho gaya — kahi bhi paste karke share karein"); } catch (e) {}
+          document.body.removeChild(ta);
+        }
+      }
       function shareBtn(u, full) {
-        return '<a class="btn btn-wa" target="_blank" rel="noreferrer" href="https://wa.me/?text=' +
-          encodeURIComponent(buildShareText(u)) + '" aria-label="Share on WhatsApp: ' + esc(u.title) + '">' +
-          WA_ICON + (full ? "Share on WhatsApp" : "Share") + "</a>";
+        return '<button type="button" class="btn btn-wa" onclick="shareNoticeBySlug(\'' + u.slug + '\')" aria-label="Share: ' + esc(u.title) + '">Share</button>';
       }
       function cardHTML(u, featured) {
         var act = actionFor(u);
