@@ -7,6 +7,22 @@
       OneSignalDeferred.push(async function(OneSignal) {
         await OneSignal.init({
           appId: "c7567434-2514-46dc-b62f-b37a3f9c4e85",
+          promptOptions: {
+            slidedown: {
+              prompts: [
+                {
+                  type: "push",
+                  autoPrompt: true,
+                  text: {
+                    actionMessage: "Nayi notices aur last dates ki notification paayein?",
+                    acceptButton: "Allow",
+                    cancelButton: "Abhi nahi"
+                  },
+                  delay: { pageViews: 1, timeDelay: 8 }
+                }
+              ]
+            }
+          }
         });
       });
     </script>
