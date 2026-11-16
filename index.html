@@ -1,31 +1,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "c7567434-2514-46dc-b62f-b37a3f9c4e85",
-          promptOptions: {
-            slidedown: {
-              prompts: [
-                {
-                  type: "push",
-                  autoPrompt: true,
-                  text: {
-                    actionMessage: "Get notifications for new notices and last dates?",
-                    acceptButton: "Allow",
-                    cancelButton: "Not now"
-                  },
-                  delay: { pageViews: 1, timeDelay: 3 }
-                }
-              ]
-            }
-          }
-        });
-      });
-    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light" />
@@ -47,6 +22,45 @@
     <meta name="twitter:description" content="Exam Form, Result, Marksheet — exam form last dates, semester results, marksheets and college notices for Wazirganj College students (Magadh University). Sessions 2023-27 to 2026-30." />
     <meta name="twitter:image" content="https://wazirganjcollege.vercel.app/assets/logo.png" />
     <meta name="theme-color" content="#0e1c3a" />
+    <!-- Browser notifications (OneSignal, SDK v16) — live site par yahi
+         setup chalta hai: page khulne ke 3 second baad slidedown prompt
+         "Get notifications for new notices and last dates?" aata hai,
+         Allow karne par new notice / last date ki push notification
+         milti hai. SDK sirf asal domain par load hota hai — OneSignal
+         app usi origin ke liye configured hai; kisi aur host ya preview
+         par init karne se woh origin error deta hai aur prompt kabhi
+         kaam nahi karta. Wahan header ka bell panel hi taaza last dates
+         aur notices dikhata hai (neeche wala Notifications script). -->
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      if (/(^|\.)wazirganjcollege\.vercel\.app$/i.test(window.location.hostname)) {
+        var osSdk = document.createElement("script");
+        osSdk.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+        osSdk.defer = true;
+        document.head.appendChild(osSdk);
+        window.OneSignalDeferred.push(async function (OneSignal) {
+          await OneSignal.init({
+            appId: "c7567434-2514-46dc-b62f-b37a3f9c4e85",
+            promptOptions: {
+              slidedown: {
+                prompts: [
+                  {
+                    type: "push",
+                    autoPrompt: true,
+                    text: {
+                      actionMessage: "Get notifications for new notices and last dates?",
+                      acceptButton: "Allow",
+                      cancelButton: "Not now"
+                    },
+                    delay: { pageViews: 1, timeDelay: 3 }
+                  }
+                ]
+              }
+            }
+          });
+        });
+      }
+    </script>
     <script>
       /* Stay at the top on every open: never restore a previous scroll
          position and never jump to a #anchor fragment on load. */
@@ -248,6 +262,72 @@
         background: var(--red); border-radius: 9px; padding: 0 22px; min-height: 44px;
       }
       .header-search .searchbar button:hover { background: var(--red-dark); }
+      .header-search .searchbar button.search-clear {
+        display: none; background: transparent; color: var(--dim);
+        padding: 0; min-height: 40px; width: 40px; font-size: 1.3rem; line-height: 1;
+        align-items: center; justify-content: center;
+      }
+      .header-search .searchbar button.search-clear.show { display: inline-flex; }
+      /* Apna clear (×) button hai — browser ka built-in search × chhupao,
+         warna dono × saath-saath dikhte hain. */
+      .header-search .searchbar input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+      .header-search .searchbar button.search-clear:hover { background: var(--surface-alt); color: var(--red); }
+      .sr-pages { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
+      .sr-pages:empty { display: none; margin-bottom: 0; }
+
+      /* ---------- Notifications — bell in header, panel opens on tap ---------- */
+      .notif-toggle {
+        position: relative;
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px; border-radius: 50%; flex: none;
+        background: #fff; color: var(--navy-deep); border: none; cursor: pointer;
+        box-shadow: 0 1px 4px rgba(0,0,0,.35); padding: 0;
+      }
+      .notif-toggle svg { width: 20px; height: 20px; }
+      .notif-toggle:hover { filter: brightness(1.08); }
+      .notif-badge {
+        position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px;
+        padding: 0 5px; border-radius: 999px; background: var(--red); color: #fff;
+        font-size: .68rem; font-weight: 800; line-height: 16px; text-align: center;
+        border: 2px solid var(--navy-deep);
+      }
+      .header-notif { display: none; padding: 0 0 12px; }
+      .header-notif.open { display: block; }
+      .notif-card {
+        background: #fff; border-radius: 12px; padding: 14px 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,.28); color: var(--text);
+      }
+      @media (min-width: 1024px) { .header-notif .notif-card { max-width: 720px; margin-left: auto; } }
+      @media (max-width: 560px) {
+        .notif-toggle { width: 32px; height: 32px; }
+        .notif-toggle svg { width: 17px; height: 17px; }
+      }
+      @media (min-width: 1024px) { .notif-toggle { width: 42px; height: 42px; } }
+      .notif-sub {
+        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+        padding-bottom: 12px; border-bottom: 1px solid var(--border);
+      }
+      .notif-sub .ns-text { flex: 1 1 220px; min-width: 0; }
+      .notif-sub .ns-text b { display: block; font-size: 1rem; color: var(--navy); }
+      .notif-sub .ns-text span { display: block; font-size: .86rem; color: var(--dim); margin-top: 2px; }
+      .notif-sub .btn[disabled] { opacity: .75; cursor: default; }
+      .notif-status { margin: 10px 0 0; font-size: .88rem; line-height: 1.5; color: var(--dim); }
+      .notif-status:empty { display: none; }
+      .notif-sec { margin-top: 12px; }
+      .notif-sec h3 {
+        margin: 0 0 4px; font-size: .78rem; font-weight: 800;
+        letter-spacing: .6px; text-transform: uppercase; color: var(--dim);
+      }
+      .notif-item {
+        display: flex; align-items: center; gap: 10px;
+        padding: 8px 0; border-top: 1px dashed var(--border); text-decoration: none;
+      }
+      .notif-sec .notif-item:first-of-type { border-top: none; }
+      .notif-item .ni-date { flex: none; font-size: .8rem; font-weight: 700; color: var(--dim); min-width: 76px; }
+      .notif-item .ni-title { flex: 1 1 auto; min-width: 0; font-weight: 700; font-size: .95rem; line-height: 1.35; color: var(--text); }
+      .notif-item:hover .ni-title { color: var(--navy); text-decoration: underline; }
+      .notif-item .alert-tag, .notif-item .badge { flex: none; }
+      .notif-empty { margin: 0; padding: 6px 0 2px; font-size: .92rem; color: var(--dim); }
 
       /* ---------- Student Services ---------- */
       .quick {
@@ -1222,6 +1302,10 @@
           </span>
         </a>
         <div class="header-actions hero-in d1">
+          <button type="button" class="notif-toggle" id="notif-toggle" aria-label="Notifications — last dates and latest notices" aria-expanded="false" aria-controls="header-notif">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+            <span class="notif-badge hidden" id="notif-badge"></span>
+          </button>
           <button type="button" class="search-toggle" id="search-toggle" aria-label="Search notices" aria-expanded="false" aria-controls="header-search">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
           </button>
@@ -1248,8 +1332,26 @@
       <div class="wrap header-search" id="header-search">
         <form class="searchbar" id="search-form" role="search">
           <input id="search-input" type="search" placeholder="Search — Exam Form, Result, Holiday, Session…" aria-label="Search notices" autocomplete="off" />
+          <button type="button" class="search-clear" id="search-clear" aria-label="Clear search">×</button>
           <button type="submit">Search</button>
         </form>
+      </div>
+      <div class="wrap header-notif" id="header-notif">
+        <div class="notif-card">
+          <div class="notif-sub">
+            <div class="ns-text"><b>Notifications</b><span>New notice ya last date aate hi is device par notification paayein.</span></div>
+            <button type="button" class="btn btn-navy" id="notif-enable">Enable Notifications</button>
+          </div>
+          <p class="notif-status" id="notif-status" role="status"></p>
+          <div class="notif-sec">
+            <h3>Last Dates</h3>
+            <div id="notif-deadlines"></div>
+          </div>
+          <div class="notif-sec">
+            <h3>Latest Notices</h3>
+            <div id="notif-latest"></div>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -1258,7 +1360,8 @@
       <div id="view-home">
         <div id="search-results" class="hidden">
           <section class="block" aria-labelledby="sr-h" style="margin-top:16px">
-            <div class="sec-head"><h2 id="sr-h">Search Results</h2></div>
+            <div class="sec-head"><h2 id="sr-h">Search Results</h2><span class="sec-note" id="sr-count"></span></div>
+            <div class="sr-pages" id="sr-pages"></div>
             <div class="grid" id="sr-grid"></div>
             <div class="empty hidden" id="noresults">No notice found.</div>
           </section>
@@ -1527,7 +1630,7 @@
 
             <div class="guide-actions">
               <a class="btn btn-navy" href="https://wazirganjcollege.edmitr.in/" target="_blank" rel="noreferrer">Admission Portal <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg></a>
-              <button type="button" class="btn btn-print"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg> Print this page</button>
+              <button type="button" class="btn btn-print" data-print><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>Print this page</button>
             </div>
           </div>
         </div>
@@ -1598,7 +1701,7 @@
 
             <div class="guide-actions">
               <a class="btn btn-navy" href="https://www.magadhonline.in/student/dashboard" target="_blank" rel="noreferrer">Open Student Dashboard <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"/></svg></a>
-              <button type="button" class="btn btn-print"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg> Print this page</button>
+              <button type="button" class="btn btn-print" data-print><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>Print this page</button>
             </div>
           </div>
         </div>
@@ -1846,24 +1949,10 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         lines.push("Join Wazirganj College Updates on WhatsApp: " + WHATSAPP_URL);
         return lines.join("\n");
       }
-      function shareNoticeBySlug(slug) {
-        var u = null;
-        for (var i = 0; i < UPDATES.length; i++) { if (UPDATES[i].slug === slug) { u = UPDATES[i]; break; } }
-        if (!u) return;
-        var text = buildShareText(u);
-        if (navigator.share) {
-          navigator.share({ title: u.title, text: text, url: SITE_URL + "/update/" + u.slug }).catch(function () {});
-        } else if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(function () { alert("Text copy ho gaya — kahi bhi paste karke share karein"); });
-        } else {
-          var ta = document.createElement("textarea");
-          ta.value = text; document.body.appendChild(ta); ta.select();
-          try { document.execCommand("copy"); alert("Text copy ho gaya — kahi bhi paste karke share karein"); } catch (e) {}
-          document.body.removeChild(ta);
-        }
-      }
       function shareBtn(u, full) {
-        return '<button type="button" class="btn btn-wa" onclick="shareNoticeBySlug(\'' + u.slug + '\')" aria-label="Share: ' + esc(u.title) + '">Share</button>';
+        return '<a class="btn btn-wa" target="_blank" rel="noreferrer" href="https://wa.me/?text=' +
+          encodeURIComponent(buildShareText(u)) + '" aria-label="Share on WhatsApp: ' + esc(u.title) + '">' +
+          WA_ICON + (full ? "Share on WhatsApp" : "Share") + "</a>";
       }
       function cardHTML(u, featured) {
         var act = actionFor(u);
@@ -2019,49 +2108,244 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         return '<section class="block" aria-labelledby="session-results-h"><div class="sec-head"><h2 id="session-results-h">Result / Marksheet</h2></div>' + inner + "</section>";
       }
 
-      /* ---------- Search ---------- */
+      /* ---------- Search (live) + Notifications (bell panel) ----------
+         Search pehle sirf Search button / Enter dabane par chalta tha —
+         type karne par kuch nahi hota tha; "2025-29" (hyphen) session
+         labels ke en-dash se match nahi hota tha, "Sem 3" type karne
+         par "Sem-III" wale notices nahi milte the, aur Result /
+         Admission jaise pages search me aate hi nahi the. Ab:
+         - type karte hi live results (chhota debounce), Enter par
+           results tak scroll bhi hota hai;
+         - query aur notice text dono normalize hote hain — hyphen /
+           en-dash ek jaise, Semester = Sem, Roman (III) = Arabic (3);
+         - notices ke saath pages (Result, Exam Form guide, Admission,
+           Deadlines, Exams) aur official result links bhi milte hain;
+         - result count, clear (×) button aur behtar "not found" text.
+         Notifications: is page ke code me OneSignal setup gayab tha
+         (live site par hai) — woh head me wapas laga diya hai, sirf
+         asal domain par active. Header ka bell panel har jagah kaam
+         karta hai: taaza last dates (days remaining ke saath) aur
+         latest notices, badge par alerts ki ginti. */
       (function () {
+        var ROMAN = { i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8 };
+        function normText(s) {
+          var t = " " + String(s == null ? "" : s).toLowerCase().replace(/[–—]/g, "-") + " ";
+          t = t.replace(/semester/g, "sem");
+          t = t.replace(/\bsem\s*-?\s*(viii|vii|vi|iv|iii|ii|i|v)\b/g, function (m, r) { return "sem" + ROMAN[r]; });
+          t = t.replace(/\bsem\s*-?\s*([1-8])\b/g, "sem$1");
+          return t.replace(/\s+/g, " ");
+        }
+        var INDEX = UPDATES.map(function (u) {
+          return { u: u, hay: normText(u.title + " " + u.summary + " " + u.content + " " + sectionLabel(u) + " " + u.slug.replace(/-/g, " ") + " " + fmtDate(u.date) + (u.lastDate ? " " + fmtDate(u.lastDate) + " last date" : "")) };
+        });
+        var PAGES = [
+          { title: "Result / Marksheet", note: "Session-wise official result & marksheet links", url: "/result", keys: "result marksheet check result download" },
+          { title: "Fill Exam Form — Guide & Login Details", note: "User ID, password aur exam form bharne ke liye kya chahiye", url: "/exam-form", keys: "exam form login user id password guide dashboard magadhonline" },
+          { title: "Apply for Admission — Documents Checklist", note: "Admission form ke liye required details & documents", url: "/admission", keys: "admission apply documents checklist edmitr" },
+          { title: "Important Deadlines", note: "Sabhi upcoming last dates ek jagah", url: "/deadlines", keys: "deadline deadlines last date" },
+          { title: "Upcoming Exams — Examination Programme", note: "Sem-III, Sem-V, Sem-VII exam dates & programme", url: "/exam", keys: "exam programme schedule date sheet upcoming" }
+        ].map(function (p) { return { p: p, hay: normText(p.title + " " + p.note + " " + p.keys) }; });
+        LINKS.filter(function (l) { return l.kind === "result"; }).forEach(function (l) {
+          var p = { title: l.label, note: l.note || "Official Result Portal", url: l.url, ext: true };
+          PAGES.push({ p: p, hay: normText(l.label + " result marksheet " + l.session) });
+        });
+
         var form = document.getElementById("search-form");
         var input = document.getElementById("search-input");
+        var clearBtn = document.getElementById("search-clear");
         var box = document.getElementById("search-results");
         var grid = document.getElementById("sr-grid");
+        var pagesBox = document.getElementById("sr-pages");
         var none = document.getElementById("noresults");
-        var toggle = document.getElementById("search-toggle");
-        var panel = document.getElementById("header-search");
-        if (toggle && panel && input) {
-          toggle.addEventListener("click", function () {
-            var willOpen = !panel.classList.contains("open");
-            panel.classList.toggle("open", willOpen);
-            toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        var count = document.getElementById("sr-count");
+        var sToggle = document.getElementById("search-toggle");
+        var sPanel = document.getElementById("header-search");
+        var nToggle = document.getElementById("notif-toggle");
+        var nPanel = document.getElementById("header-notif");
+        var badge = document.getElementById("notif-badge");
+
+        function setPanel(panel, toggle, open) {
+          if (!panel || !toggle) return;
+          panel.classList.toggle("open", open);
+          toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        }
+        if (sToggle && sPanel && input) {
+          sToggle.addEventListener("click", function () {
+            var willOpen = !sPanel.classList.contains("open");
+            setPanel(sPanel, sToggle, willOpen);
             if (willOpen) {
+              setPanel(nPanel, nToggle, false);
               /* Focus inside the tap handler so the mobile keyboard opens. */
               input.focus();
               try { input.setSelectionRange(input.value.length, input.value.length); } catch (e) {}
             }
           });
         }
-        function run(q) {
-          q = (q || "").trim().toLowerCase();
-          if (!q) { box.classList.add("hidden"); return; }
-          var hits = UPDATES.filter(function (u) {
-            var hay = (u.title + " " + u.summary + " " + u.content + " " + sectionLabel(u)).toLowerCase();
-            return q.split(/\s+/).every(function (w) { return hay.indexOf(w) !== -1; });
+        if (nToggle && nPanel) {
+          nToggle.addEventListener("click", function () {
+            var willOpen = !nPanel.classList.contains("open");
+            setPanel(nPanel, nToggle, willOpen);
+            if (willOpen) {
+              setPanel(sPanel, sToggle, false);
+              /* Panel khulte hi badge saaf — alerts dekh liye gaye
+                 (sirf is session ke liye, kuch save nahi hota). */
+              if (badge) badge.classList.add("hidden");
+            }
           });
-          box.classList.remove("hidden");
-          grid.innerHTML = hits.map(function (u) { return cardHTML(u, false); }).join("");
-          none.classList.toggle("hidden", hits.length > 0);
-          /* Results appear in place — never scroll the page for the user. */
+          nPanel.addEventListener("click", function (e) {
+            if (e.target && e.target.closest && e.target.closest("a")) setPanel(nPanel, nToggle, false);
+          });
         }
-        form.addEventListener("submit", function (e) {
-          e.preventDefault();
-          var home = document.getElementById("view-home");
-          if (home && home.classList.contains("hidden")) {
-            setUrl("/", false);
-            route(false);
-          }
-          run(input.value);
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") { setPanel(sPanel, sToggle, false); setPanel(nPanel, nToggle, false); }
         });
-        input.addEventListener("input", function () { if (!input.value.trim()) box.classList.add("hidden"); });
+
+        function ensureHome() {
+          var home = document.getElementById("view-home");
+          if (home && home.classList.contains("hidden")) { setUrl("/", false); route(false); }
+        }
+        function pageItemHTML(p) {
+          var attrs = p.ext ? ' target="_blank" rel="noreferrer"' : "";
+          return '<div class="link-item"><div class="li-main"><b>' + esc(p.title) + '</b><span>' + esc(p.note) + '</span></div>' +
+            '<a class="btn btn-navy" href="' + esc(p.url) + '"' + attrs + ">" + (p.ext ? "Open " + EXT_ICON : "Open Page") + "</a></div>";
+        }
+        function showHint(msg) {
+          box.classList.remove("hidden");
+          pagesBox.innerHTML = "";
+          grid.innerHTML = "";
+          if (count) count.textContent = "";
+          none.textContent = msg;
+          none.classList.remove("hidden");
+        }
+        function run(raw, scroll) {
+          var q = normText(raw).trim();
+          if (!q) { box.classList.add("hidden"); return; }
+          var words = q.split(" ").filter(function (w) { return w.length > 0; });
+          var pageHits = PAGES.filter(function (e) { return words.every(function (w) { return e.hay.indexOf(w) !== -1; }); });
+          var hits = INDEX.filter(function (e) { return words.every(function (w) { return e.hay.indexOf(w) !== -1; }); });
+          box.classList.remove("hidden");
+          pagesBox.innerHTML = pageHits.map(function (e) { return pageItemHTML(e.p); }).join("");
+          grid.innerHTML = hits.map(function (e) { return cardHTML(e.u, false); }).join("");
+          var total = pageHits.length + hits.length;
+          if (count) count.textContent = total ? total + (total === 1 ? " result" : " results") + ' for "' + String(raw).trim() + '"' : "";
+          none.textContent = 'No notice found for "' + String(raw).trim() + '". Try "Exam Form", "PMS", "Holiday", "Result" ya apna session — jaise 2025-29.';
+          none.classList.toggle("hidden", total > 0);
+          if (scroll) {
+            var sec = box.querySelector("section");
+            (sec || box).scrollIntoView({ block: "start" });
+          }
+        }
+        if (form) {
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            ensureHome();
+            if (!input.value.trim()) {
+              showHint('Kuch likhkar search karein — jaise "Exam Form", "PMS", "Holiday", "Result" ya session 2025-29.');
+              var sec0 = box.querySelector("section");
+              (sec0 || box).scrollIntoView({ block: "start" });
+              return;
+            }
+            run(input.value, true);
+          });
+        }
+        var deb = null;
+        if (input) {
+          input.addEventListener("input", function () {
+            if (clearBtn) clearBtn.classList.toggle("show", !!input.value);
+            if (deb) clearTimeout(deb);
+            var v = input.value;
+            if (!v.trim()) { box.classList.add("hidden"); return; }
+            deb = setTimeout(function () { ensureHome(); run(v, false); }, 160);
+          });
+        }
+        if (clearBtn && input) {
+          clearBtn.addEventListener("click", function () {
+            input.value = "";
+            clearBtn.classList.remove("show");
+            box.classList.add("hidden");
+            input.focus();
+          });
+        }
+
+        /* ---------- Notifications panel: last dates + latest notices ---------- */
+        function byDateDesc(a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; }
+        var nowISO = todayISO();
+        var dl = UPDATES.filter(function (u) { return u.lastDate && u.lastDate >= nowISO; })
+          .sort(function (a, b) { return a.lastDate < b.lastDate ? -1 : 1; });
+        var dlHost = document.getElementById("notif-deadlines");
+        if (dlHost) {
+          dlHost.innerHTML = dl.length ? dl.slice(0, 5).map(function (u) {
+            var d = daysUntil(u.lastDate);
+            var tag = d === 0 ? "Closing Today" : d === 1 ? "Closing Tomorrow" : d + " days left";
+            return '<a class="notif-item" href="' + updatePath(u.slug) + '"><span class="ni-date">' + fmtDate(u.lastDate) + '</span><span class="ni-title">' + esc(u.title) + '</span><span class="alert-tag' + (d <= 1 ? "" : " soon") + '">' + tag + "</span></a>";
+          }).join("") : '<p class="notif-empty">No upcoming last dates right now.</p>';
+        }
+        var latestHost = document.getElementById("notif-latest");
+        if (latestHost) {
+          var latest = UPDATES.slice().sort(byDateDesc).slice(0, 5);
+          latestHost.innerHTML = latest.map(function (u) {
+            return '<a class="notif-item" href="' + updatePath(u.slug) + '"><span class="ni-date">' + fmtDate(u.date) + '</span><span class="ni-title">' + esc(u.title) + "</span>" + (u.important ? '<span class="badge important">Important</span>' : "") + "</a>";
+          }).join("");
+        }
+        if (badge) {
+          var alerts = {};
+          dl.forEach(function (u) { if (daysUntil(u.lastDate) <= 5) alerts[u.slug] = 1; });
+          UPDATES.forEach(function (u) {
+            var age = daysUntil(u.date);
+            if (u.important && age <= 0 && age >= -7) alerts[u.slug] = 1;
+          });
+          var n = Object.keys(alerts).length;
+          if (n > 0) { badge.textContent = n > 9 ? "9+" : String(n); badge.classList.remove("hidden"); }
+        }
+
+        /* ---------- Push subscribe (OneSignal — sirf asal domain par) ---------- */
+        var enableBtn = document.getElementById("notif-enable");
+        var statusEl = document.getElementById("notif-status");
+        var osLive = /(^|\.)wazirganjcollege\.vercel\.app$/i.test(window.location.hostname);
+        function setStatus(t) { if (statusEl) statusEl.textContent = t || ""; }
+        function markOn() {
+          if (enableBtn) { enableBtn.textContent = "Notifications On"; enableBtn.disabled = true; }
+          setStatus("Notifications ON hain — new notice aur last date ki push is device par milegi.");
+        }
+        if (osLive) {
+          window.OneSignalDeferred.push(async function (OneSignal) {
+            try {
+              if (OneSignal.User.PushSubscription.optedIn) { markOn(); return; }
+              OneSignal.User.PushSubscription.addEventListener("change", function (ev) {
+                if (ev.current && ev.current.optedIn) markOn();
+              });
+            } catch (e) {}
+          });
+        } else if ("Notification" in window && Notification.permission === "granted") {
+          setStatus("Is device par notifications Allow hain. Push notifications live website (wazirganjcollege.vercel.app) se aati hain — wahan bhi Allow rakhein.");
+        }
+        if (enableBtn) {
+          enableBtn.addEventListener("click", function () {
+            if (osLive) {
+              setStatus("Notification prompt khul raha hai — Allow dabayein.");
+              window.OneSignalDeferred.push(async function (OneSignal) {
+                try { await OneSignal.Slidedown.promptPush({ force: true }); }
+                catch (e) { try { await OneSignal.Notifications.requestPermission(); } catch (e2) {} }
+              });
+              return;
+            }
+            if (!("Notification" in window) || !Notification.requestPermission) {
+              setStatus("Is browser me notification permission nahi mil sakti — updates ke liye WhatsApp / Telegram channel join karein.");
+              return;
+            }
+            function afterPerm(res) {
+              var perm = res || Notification.permission;
+              if (perm === "granted") setStatus("Notifications Allow ho gayi hain. Push notifications live website (wazirganjcollege.vercel.app) se aati hain — wahan bhi Allow rakhein. Bell me taaza last dates aur notices yahin milte rahenge.");
+              else if (perm === "denied") setStatus("Notifications block hain — browser ki site settings me Notifications Allow karein. Tab tak bell aur WhatsApp / Telegram channel par updates milte rahenge.");
+              else setStatus("Notification prompt band ho gaya — Enable Notifications dobara dabakar Allow karein.");
+            }
+            try {
+              var pr = Notification.requestPermission();
+              if (pr && pr.then) pr.then(afterPerm, function () { afterPerm(""); });
+              else afterPerm(Notification.permission);
+            } catch (e) { afterPerm(""); }
+          });
+        }
       })();
 
       /* ---------- Detail view (path routing: /update/<slug>) ---------- */
@@ -2270,15 +2554,17 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         window.scrollTo(0, 0);
       }
       /* ---------- Printing (guide pages) ----------
-         /admission aur /exam-form par "Print this page" button hai:
-         click par window.print() chalta hai aur @media print rules
-         khule hue guide page ko full A4 par bold, clearly readable
-         chhapte hain — anti-crop watermark + WhatsApp QR ke saath.
-         Button live site par real browser me kaam karta hai (cafe
-         printouts ke liye); preview sandbox me print blocked ho sakta
-         hai, isliye button wahan bhi rakha rehta hai. */
+         Guide pages (/admission, /exam-form) par "Print this page"
+         button hai — students live site par real browser (cafe) se
+         guide print karte hain. Delegated click handler neeche
+         window.print() call karta hai; @media print CSS ka one-page
+         A4 layout (watermark + WhatsApp QR ke saath) waisa hi rehta
+         hai, aur .guide-actions print me hidden rehta hai taaki
+         button printout par na aaye. Preview iframe me window.print()
+         blocked ho sakta hai, lekin live site par button kaam karta
+         hai — isliye button yahan rakha gaya hai. */
       document.addEventListener("click", function (e) {
-        var btn = e.target.closest ? e.target.closest(".btn-print") : null;
+        var btn = e.target && e.target.closest ? e.target.closest("[data-print]") : null;
         if (!btn) return;
         e.preventDefault();
         window.print();
