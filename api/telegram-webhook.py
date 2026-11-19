@@ -11,6 +11,12 @@ replacement because its systemd unit lives in ephemeral /etc.
 - Optional shared secret: if TELEGRAM_WEBHOOK_SECRET is set, Telegram
   must send it as X-Telegram-Bot-Api-Secret-Token, else 403.
 - GET returns a health JSON (no token needed) for monitoring.
+- HYBRID AI (Gemini): canned answers always win. Only a college
+  question the rules cannot answer (A_FALLBACK) goes to Gemini, grounded
+  ONLY on the live website's notices (fetched at runtime). Gemini must
+  answer in short formal Devanagari Hindi, or reply NAHI_PATA — then the
+  bot falls back to A_FALLBACK. No key (GEMINI_API_KEY) = no AI, canned
+  behaviour unchanged.
 - Replies ONLY in the discussion group (GROUP_CHAT_ID). Never in
   private chats or other groups. Same rules as the polling bot:
   short formal Devanagari Hindi, only what was asked, no link previews,
@@ -19,14 +25,35 @@ replacement because its systemd unit lives in ephemeral /etc.
 
 import json
 import os
+import re
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler
 
 TOKEN = os.environ.get("TELEGRAM_GROUP_BOT_TOKEN", "")
 WEBHOOK_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
 GROUP_CHAT_ID = int(os.environ.get("GROUP_CHAT_ID", "-1002003808705"))
 API = "https://api.telegram.org/bot" + TOKEN
+
+AI_SYSTEM = (
+    "You answer students' questions about Wazirganj College (Magadh "
+    "University) in the Wazirganj College Updates discussion group. "
+    "RULES (strict): answer ONLY from the NOTICES given below — never "
+    "from general knowledge, never invent dates, fees, links or numbers. "
+    "Reply in short formal Devanagari Hindi (1-3 lines), English terms "
+    "in Latin script (Exam Form, Admit Card, Last Date). Say ONLY what "
+    "was asked, no extra information, no join/channel links. If the "
+    "question asks for a sir/teacher/principal phone number, reply ONLY "
+    "with this line: 'Sir/Teacher के number इस message में दिए गए हैं: "
+    "https://t.me/c/2003808705/20695'. Never give a magadhonline link or "
+    "a Telegram link. The Exam Form link, if asked, is only "
+    "wazirganjcollege.vercel.app. If the notices do not contain the "
+    "answer, reply with exactly: NAHI_PATA"
+)
+
+PHONE_RE = re.compile(r"[6-9]\d{9}")
 
 WEBSITE = "wazirganjcollege.vercel.app"
 WA_CHANNEL = "https://whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q"
@@ -81,6 +108,73 @@ def answer_callback(callback_query_id):
               {"callback_query_id": callback_query_id})
 
 
+def fetch_notices():
+    """Newest notices from the live website (grounding for the AI)."""
+    try:
+        req = urllib.request.Request(
+            "https://wazirganjcollege.vercel.app/", method="GET")
+        with urllib.request.urlopen(req, timeout=10) as r:
+            html = r.read().decode("utf-8", "replace")
+    except Exception as e:  # noqa: BLE001
+        print("telegram-webhook: site fetch failed: %s" % type(e).__name__)
+        return []
+    i = html.find("const UPDATES = ")
+    if i == -1:
+        return []
+    try:
+        updates, _ = json.JSONDecoder().raw_decode(
+            html, i + len("const UPDATES = "))
+    except Exception:  # noqa: BLE001
+        return []
+    lines = []
+    for n in updates[:25]:
+        line = "- %s | %s" % (n.get("title", ""), n.get("summary", ""))
+        if n.get("lastDate"):
+            line += " | Last Date: %s" % n.get("lastDate")
+        lines.append(line)
+    return lines
+
+
+def ai_answer(question):
+    """Gemini fallback for college questions the rules cannot answer.
+    Returns a grounded short answer, or None (caller falls back)."""
+    if not GEMINI_API_KEY:
+        return None
+    notices = fetch_notices()
+    if not notices:
+        return None
+    prompt = ("NOTICES:\n" + "\n".join(notices)
+              + "\n\nQUESTION: " + question)
+    body = json.dumps({
+        "system_instruction": {"parts": [{"text": AI_SYSTEM}]},
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"temperature": 0.2, "maxOutputTokens": 300},
+    }).encode("utf-8")
+    try:
+        req = urllib.request.Request(
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+            + GEMINI_MODEL + ":generateContent",
+            data=body,
+            headers={"Content-Type": "application/json",
+                     "x-goog-api-key": GEMINI_API_KEY},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=20) as r:
+            data = json.loads(r.read().decode("utf-8"))
+    except Exception as e:  # noqa: BLE001 - never log key/URL/body
+        print("telegram-webhook: gemini call failed: %s" % type(e).__name__)
+        return None
+    try:
+        text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except (KeyError, IndexError, TypeError):
+        return None
+    if not text or text == "NAHI_PATA" or len(text) > 600:
+        return None
+    if PHONE_RE.search(text):
+        return None
+    return text
+
+
 def send_menu(chat_id, reply_to=None):
     return send_message(chat_id, MENU_TEXT, reply_to=reply_to,
                         markup=MENU_KEYBOARD)
@@ -125,6 +219,12 @@ def handle_message(msg):
     answer = find_answer(text)
     if answer is None:
         return
+    if answer == A_FALLBACK:
+        # Hybrid AI: only a college question the rules cannot answer
+        # goes to Gemini; anything ungrounded falls back as before.
+        ai = ai_answer(text)
+        if ai:
+            answer = ai
     send_message(chat["id"], answer, reply_to=msg.get("message_id"))
     print("telegram-webhook: replied to msg %s: %r"
           % (msg.get("message_id"), text[:60]))
@@ -386,6 +486,11 @@ class handler(BaseHTTPRequestHandler):
         except Exception:  # noqa: BLE001
             self._json(400, {"ok": False, "error": "bad json"})
             return
+        # Answer Telegram immediately, then do the work: the AI fallback
+        # can take seconds, and a slow 200 makes Telegram retry the
+        # update (duplicate replies). The handler still runs to completion
+        # after the response is flushed.
+        self._json(200, {"ok": True})
         try:
             if update.get("callback_query"):
                 handle_callback(update["callback_query"])
@@ -393,7 +498,6 @@ class handler(BaseHTTPRequestHandler):
                 handle_message(update["message"])
         except Exception as e:  # noqa: BLE001 - never fail the webhook
             print("telegram-webhook: handler error: %s" % type(e).__name__)
-        self._json(200, {"ok": True})
 
     def log_message(self, *args):  # keep Vercel logs clean
         pass
