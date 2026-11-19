@@ -11,12 +11,15 @@ replacement because its systemd unit lives in ephemeral /etc.
 - Optional shared secret: if TELEGRAM_WEBHOOK_SECRET is set, Telegram
   must send it as X-Telegram-Bot-Api-Secret-Token, else 403.
 - GET returns a health JSON (no token needed) for monitoring.
-- HYBRID AI (Gemini): canned answers always win. Only a college
-  question the rules cannot answer (A_FALLBACK) goes to Gemini, grounded
-  ONLY on the live website's notices (fetched at runtime). Gemini must
-  answer in short formal Devanagari Hindi, or reply NAHI_PATA — then the
-  bot falls back to A_FALLBACK. No key (GEMINI_API_KEY) = no AI, canned
-  behaviour unchanged.
+- AI TONE (Gemini, all replies): every college answer is rephrased by
+  Gemini in a natural AI tone — but the FACTS always come from the canned
+  answer, and a fact check rejects any rephrase that drops or changes a
+  date, fee, link or number (then the canned text is sent as-is).
+  Link-only answers (teacher number) and refusals (roll/password) are
+  never rephrased. Questions the rules cannot answer go to Gemini
+  grounded ONLY on the live website's notices + past Q&A (fetched at
+  runtime); ungrounded -> NAHI_PATA -> A_FALLBACK. No key
+  (GEMINI_API_KEY) = no AI, canned behaviour unchanged.
 - Replies ONLY in the discussion group (GROUP_CHAT_ID). Never in
   private chats or other groups. Same rules as the polling bot:
   short formal Devanagari Hindi, only what was asked, no link previews,
@@ -143,10 +146,56 @@ def ai_answer(question):
     notices = fetch_notices()
     if not notices:
         return None
-    prompt = ("NOTICES:\n" + "\n".join(notices)
-              + "\n\nQUESTION: " + question)
+    parts = ["NOTICES:\n" + "\n".join(notices)]
+    past = past_qa_lines()
+    if past:
+        parts.append("PAST Q&A (how similar questions were answered):\n"
+                     + "\n".join(past))
+    parts.append("QUESTION: " + question)
+    text = gemini_text(AI_SYSTEM, "\n\n".join(parts))
+    if not text or text == "NAHI_PATA" or len(text) > 600:
+        return None
+    if PHONE_RE.search(text):
+        return None
+    return text
+
+
+REPHRASE_SYSTEM = (
+    "Rephrase the FACT below in a natural, friendly AI-assistant tone, "
+    "in short formal Devanagari Hindi (1-3 lines), English terms in "
+    "Latin script (Exam Form, Admit Card, Last Date). Keep EVERY date, "
+    "fee, amount, link, name and number EXACTLY as in the FACT — do not "
+    "change, drop or add any of them, do not add extra information. "
+    "Reply with the rephrased text only."
+)
+
+FACT_RE = re.compile(
+    r"\d{2}/\d{2}/\d{4}|Rs\.\s*\d+|https?://\S+|"
+    r"\b[\w-]+\.(?:gov\.in|vercel\.app|in|com)\b")
+
+
+def fact_tokens(text):
+    """Dates, fees, links and domains that must survive a rephrase."""
+    return [t.rstrip(".,)") for t in FACT_RE.findall(text)]
+
+
+def facts_preserved(fact, text):
+    return all(tok in text for tok in fact_tokens(fact))
+
+
+def should_rephrase(answer):
+    """Never rephrase link-only answers or private-data refusals."""
+    if "http" in answer:
+        return False
+    return answer is not A_ROLL
+
+
+def gemini_text(system, prompt):
+    """One Gemini call. Returns the reply text, or None on any failure."""
+    if not GEMINI_API_KEY:
+        return None
     body = json.dumps({
-        "system_instruction": {"parts": [{"text": AI_SYSTEM}]},
+        "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.2, "maxOutputTokens": 300},
     }).encode("utf-8")
@@ -165,14 +214,47 @@ def ai_answer(question):
         print("telegram-webhook: gemini call failed: %s" % type(e).__name__)
         return None
     try:
-        text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
     except (KeyError, IndexError, TypeError):
         return None
-    if not text or text == "NAHI_PATA" or len(text) > 600:
-        return None
+
+
+def ai_rephrase(question, fact):
+    """Rephrase a canned fact in AI tone. Falls back to the fact itself."""
+    if not should_rephrase(fact):
+        return fact
+    text = gemini_text(
+        REPHRASE_SYSTEM,
+        "QUESTION: " + question + "\n\nFACT: " + fact)
+    if not text or len(text) > 600:
+        return fact
     if PHONE_RE.search(text):
-        return None
+        return fact
+    if not facts_preserved(fact, text):
+        return fact
     return text
+
+
+def past_qa_lines():
+    """Past Q&A pairs (from the menu's sample questions) — the bot's
+    memory of how questions were answered before. Auto-train input."""
+    lines = []
+    for q in CALLBACK_QUESTIONS.values():
+        a = find_answer(q)
+        if a and a is not A_FALLBACK:
+            lines.append("Q: %s | A: %s" % (q, a))
+    return lines
+
+
+def final_answer(question, canned):
+    """The reply to send: canned fact in AI tone, or the AI-grounded
+    answer for questions the rules cannot answer."""
+    if canned is None:
+        return None
+    if canned == A_FALLBACK:
+        ai = ai_answer(question)
+        return ai if ai else A_FALLBACK
+    return ai_rephrase(question, canned)
 
 
 def send_menu(chat_id, reply_to=None):
@@ -193,7 +275,8 @@ def handle_callback(cq):
     if data_cb == "menu":
         text, markup = MENU_TEXT, MENU_KEYBOARD
     elif data_cb in CALLBACK_QUESTIONS:
-        text = find_answer(CALLBACK_QUESTIONS[data_cb]) or A_FALLBACK
+        q = CALLBACK_QUESTIONS[data_cb]
+        text = final_answer(q, find_answer(q) or A_FALLBACK)
         markup = BACK_KEYBOARD
     else:
         return
@@ -216,15 +299,9 @@ def handle_message(msg):
     if cmd in ("/menu", "/menu@wcu_assistantbot"):
         send_menu(chat["id"], reply_to=msg.get("message_id"))
         return
-    answer = find_answer(text)
+    answer = final_answer(text, find_answer(text))
     if answer is None:
         return
-    if answer == A_FALLBACK:
-        # Hybrid AI: only a college question the rules cannot answer
-        # goes to Gemini; anything ungrounded falls back as before.
-        ai = ai_answer(text)
-        if ai:
-            answer = ai
     send_message(chat["id"], answer, reply_to=msg.get("message_id"))
     print("telegram-webhook: replied to msg %s: %r"
           % (msg.get("message_id"), text[:60]))
