@@ -74,7 +74,7 @@ def tg(method, payload):
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with urllib.request.urlopen(req, timeout=10) as r:
             return json.loads(r.read().decode("utf-8")).get("ok", False)
     except Exception as e:  # noqa: BLE001 - log type only, never body/URL
         print("telegram-webhook: %s failed: %s" % (method, type(e).__name__))
@@ -116,7 +116,7 @@ def fetch_notices():
     try:
         req = urllib.request.Request(
             "https://wazirganjcollege.vercel.app/", method="GET")
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(req, timeout=6) as r:
             html = r.read().decode("utf-8", "replace")
     except Exception as e:  # noqa: BLE001
         print("telegram-webhook: site fetch failed: %s" % type(e).__name__)
@@ -191,7 +191,9 @@ def should_rephrase(answer):
 
 
 def gemini_text(system, prompt):
-    """One Gemini call. Returns the reply text, or None on any failure."""
+    """One Gemini call. Returns the reply text, or None on any failure.
+    Fast-fail (6s): a slow AI call must never delay the reply — the
+    caller sends the canned fact instead, so the bot always answers."""
     if not GEMINI_API_KEY:
         return None
     body = json.dumps({
@@ -208,7 +210,7 @@ def gemini_text(system, prompt):
                      "x-goog-api-key": GEMINI_API_KEY},
             method="POST",
         )
-        with urllib.request.urlopen(req, timeout=20) as r:
+        with urllib.request.urlopen(req, timeout=6) as r:
             data = json.loads(r.read().decode("utf-8"))
     except Exception as e:  # noqa: BLE001 - never log key/URL/body
         print("telegram-webhook: gemini call failed: %s" % type(e).__name__)
@@ -219,10 +221,19 @@ def gemini_text(system, prompt):
         return None
 
 
+_REPHRASE_CACHE = {}
+
+
 def ai_rephrase(question, fact):
-    """Rephrase a canned fact in AI tone. Falls back to the fact itself."""
+    """Rephrase a canned fact in AI tone. Falls back to the fact itself.
+    A validated rephrase is cached per fact, so repeat questions (the
+    same last-date questions all day) answer instantly and use no
+    extra Gemini quota."""
     if not should_rephrase(fact):
         return fact
+    hit = _REPHRASE_CACHE.get(fact)
+    if hit is not None:
+        return hit
     text = gemini_text(
         REPHRASE_SYSTEM,
         "QUESTION: " + question + "\n\nFACT: " + fact)
@@ -232,6 +243,8 @@ def ai_rephrase(question, fact):
         return fact
     if not facts_preserved(fact, text):
         return fact
+    if len(_REPHRASE_CACHE) < 200:
+        _REPHRASE_CACHE[fact] = text
     return text
 
 
