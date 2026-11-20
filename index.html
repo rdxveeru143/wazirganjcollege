@@ -275,60 +275,6 @@
       .sr-pages { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 14px; }
       .sr-pages:empty { display: none; margin-bottom: 0; }
 
-      /* ---------- Notifications — bell in header, panel opens on tap ---------- */
-      .notif-toggle {
-        position: relative;
-        display: inline-flex; align-items: center; justify-content: center;
-        width: 38px; height: 38px; border-radius: 50%; flex: none;
-        background: #fff; color: var(--navy-deep); border: none; cursor: pointer;
-        box-shadow: 0 1px 4px rgba(0,0,0,.35); padding: 0;
-      }
-      .notif-toggle svg { width: 20px; height: 20px; }
-      .notif-toggle:hover { filter: brightness(1.08); }
-      .notif-badge {
-        position: absolute; top: -5px; right: -5px; min-width: 20px; height: 20px;
-        padding: 0 5px; border-radius: 999px; background: var(--red); color: #fff;
-        font-size: .68rem; font-weight: 800; line-height: 16px; text-align: center;
-        border: 2px solid var(--navy-deep);
-      }
-      .header-notif { display: none; padding: 0 0 12px; }
-      .header-notif.open { display: block; }
-      .notif-card {
-        background: #fff; border-radius: 12px; padding: 14px 16px;
-        box-shadow: 0 4px 16px rgba(0,0,0,.28); color: var(--text);
-      }
-      @media (min-width: 1024px) { .header-notif .notif-card { max-width: 720px; margin-left: auto; } }
-      @media (max-width: 560px) {
-        .notif-toggle { width: 32px; height: 32px; }
-        .notif-toggle svg { width: 17px; height: 17px; }
-      }
-      @media (min-width: 1024px) { .notif-toggle { width: 42px; height: 42px; } }
-      .notif-sub {
-        display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-        padding-bottom: 12px; border-bottom: 1px solid var(--border);
-      }
-      .notif-sub .ns-text { flex: 1 1 220px; min-width: 0; }
-      .notif-sub .ns-text b { display: block; font-size: 1rem; color: var(--navy); }
-      .notif-sub .ns-text span { display: block; font-size: .86rem; color: var(--dim); margin-top: 2px; }
-      .notif-sub .btn[disabled] { opacity: .75; cursor: default; }
-      .notif-status { margin: 10px 0 0; font-size: .88rem; line-height: 1.5; color: var(--dim); }
-      .notif-status:empty { display: none; }
-      .notif-sec { margin-top: 12px; }
-      .notif-sec h3 {
-        margin: 0 0 4px; font-size: .78rem; font-weight: 800;
-        letter-spacing: .6px; text-transform: uppercase; color: var(--dim);
-      }
-      .notif-item {
-        display: flex; align-items: center; gap: 10px;
-        padding: 8px 0; border-top: 1px dashed var(--border); text-decoration: none;
-      }
-      .notif-sec .notif-item:first-of-type { border-top: none; }
-      .notif-item .ni-date { flex: none; font-size: .8rem; font-weight: 700; color: var(--dim); min-width: 76px; }
-      .notif-item .ni-title { flex: 1 1 auto; min-width: 0; font-weight: 700; font-size: .95rem; line-height: 1.35; color: var(--text); }
-      .notif-item:hover .ni-title { color: var(--navy); text-decoration: underline; }
-      .notif-item .alert-tag, .notif-item .badge { flex: none; }
-      .notif-empty { margin: 0; padding: 6px 0 2px; font-size: .92rem; color: var(--dim); }
-
       /* ---------- Student Services ---------- */
       .quick {
         background: var(--surface-alt); border: 1px solid var(--border);
@@ -1302,10 +1248,7 @@
           </span>
         </a>
         <div class="header-actions hero-in d1">
-          <button type="button" class="notif-toggle" id="notif-toggle" aria-label="Notifications — last dates and latest notices" aria-expanded="false" aria-controls="header-notif">
-            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-            <span class="notif-badge hidden" id="notif-badge"></span>
-          </button>
+          
           <button type="button" class="search-toggle" id="search-toggle" aria-label="Search notices" aria-expanded="false" aria-controls="header-search">
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
           </button>
@@ -1336,23 +1279,7 @@
           <button type="submit">Search</button>
         </form>
       </div>
-      <div class="wrap header-notif" id="header-notif">
-        <div class="notif-card">
-          <div class="notif-sub">
-            <div class="ns-text"><b>Notifications</b><span>New notice ya last date aate hi is device par notification paayein.</span></div>
-            <button type="button" class="btn btn-navy" id="notif-enable">Enable Notifications</button>
-          </div>
-          <p class="notif-status" id="notif-status" role="status"></p>
-          <div class="notif-sec">
-            <h3>Last Dates</h3>
-            <div id="notif-deadlines"></div>
-          </div>
-          <div class="notif-sec">
-            <h3>Latest Notices</h3>
-            <div id="notif-latest"></div>
-          </div>
-        </div>
-      </div>
+      
     </header>
 
     <main class="wrap">
