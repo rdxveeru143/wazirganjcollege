@@ -1231,7 +1231,24 @@
       body.force-desktop .grid > *, body.force-desktop .home-sessions-grid > *,
       body.force-desktop .session-grid > *, body.force-desktop .tiles > *,
       body.force-desktop #dl-list > *, body.force-desktop #dl-list-page > * { min-width: 0; }
-    </style>
+    
+      /* ---------- Professional polish (20 Nov 2026) ----------
+         Desktop + mobile compatible look: header accent, tile/card
+         lift, section-heading accent, fluid grids. Content, links,
+         wording, logo and social icons unchanged. */
+      header.site { border-bottom: 3px solid var(--yellow); }
+      .tile { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+      .tile:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16, 32, 66, .14); border-color: var(--navy); }
+      .tile:focus-visible { outline: 3px solid rgba(34, 158, 217, .55); outline-offset: 2px; }
+      .quick h2, .sec-head h2 { display: inline-block; padding-bottom: 5px; border-bottom: 3px solid var(--yellow); }
+      .session-col-head { border-bottom: 3px solid var(--yellow); }
+      .card { transition: transform .18s ease, box-shadow .18s ease; }
+      .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16, 32, 66, .14); }
+      @media (min-width: 720px) { .home-sessions-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (min-width: 1024px) { .home-sessions-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+      @media (max-width: 560px) { .brand img { width: 44px; height: 44px; } .header-in { padding: 8px 0; } }
+      @media (prefers-reduced-motion: reduce) { .tile, .card { transition: none; } .tile:hover, .card:hover { transform: none; } }
+</style>
     <script>
       window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
