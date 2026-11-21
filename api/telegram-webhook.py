@@ -359,7 +359,7 @@ A_SEM3_FORM = (
 )
 
 A_PROGRAMME = (
-    "Sem-III (Session 2025-29) का Exam Programme 26/11/2026 से 02/12/2026 तक है।"
+    "Sem-III (Session 2025-29) का Exam Programme 26/11/2026 से 02/12/2026 तक है। Details: https://t.me/Wazirganj_Collegeinfo/2179"
 )
 
 A_ADMIT = (
@@ -413,15 +413,16 @@ A_DEADLINES = (
 )
 
 A_FORM_GENERIC = (
-    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal अभी नहीं खुला है (Last Date 19/11/2026)। Exam Form के लिए हमारी website देखें: wazirganjcollege.vercel.app"
+    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal अभी नहीं खुला है (Last Date 19/11/2026)।"
 )
 
 # NEW (21 Nov 2026, intent-first fix): "form kaise bharen" ka jawab — pehle
 # ye sawaal session ki last date me kho jata tha. Sirf itna hi kehte hain
-# jo pakka pata hai: form ONLINE bhara jata hai, steps + link website par.
+# jo pakka pata hai: form ONLINE bhara jata hai. (Veeru's word, 21 Nov:
+# students ko website pe jaane ko mat bolo — isliye yahan koi website link
+# nahi hai; jiska jawab bot ke paas nahi hai, wo Muse Veeru se puchega.)
 A_FORM_HOW = (
-    "Exam Form ONLINE bhara jata hai। Form bharne ke steps aur link के लिए "
-    "हमारी website देखें: wazirganjcollege.vercel.app"
+    "Exam Form ONLINE bhara jata hai।"
 )
 
 A_FALLBACK = (
@@ -437,22 +438,16 @@ A_FALLBACK = (
 
 MENU_TEXT = (
     "Wazirganj College Updates\n\n"
-    "किस बारे में जानना है? नीचे से चुनें:\n\n"
+    "Sawal puchna hai? Neeche dabayen:\n\n"
     "Admin: Veeru Verma"
 )
 
+# Starting panel (21 Nov 2026, Veeru's word): SIRF ❓ Ask Me Question.
+# Baaki topics (PMS, admission, teacher, office) ke buttons starting
+# panel se hata diye — type karke sawal puchne par unke jawab abhi bhi
+# milte hain, aur purane menu messages ke buttons bhi kaam karte hain.
 MENU_KEYBOARD = {"inline_keyboard": [
     [{"text": "❓ Ask Me Question", "callback_data": "ask"}],
-    [{"text": "📝 Exam Form Last Dates", "callback_data": "exam_dates"},
-     {"text": "📅 Exam Programme", "callback_data": "programme"}],
-    [{"text": "🎫 Admit Card", "callback_data": "admit"},
-     {"text": "💰 Exam Fee", "callback_data": "fee"}],
-    [{"text": "🎓 PMS Scholarship", "callback_data": "pms"},
-     {"text": "📄 Admission Documents", "callback_data": "admission_docs"}],
-    [{"text": "🗓️ Admission Last Date", "callback_data": "admission_last"},
-     {"text": "👨‍🏫 Sir/Teacher Number", "callback_data": "teacher"}],
-    [{"text": "🕐 Office Timing", "callback_data": "office"},
-     {"text": "📋 All Last Dates", "callback_data": "all_dates"}],
 ]}
 
 BACK_KEYBOARD = {"inline_keyboard": [
@@ -493,12 +488,15 @@ SESSION_TEXT = (
     "Apna session chunen:"
 )
 
+# Session panel (21 Nov 2026, Veeru's word): SIRF session name, semester
+# nahi. Charo session 2 line me (har line me 2), aur niche ek bada
+# Back button (poori line me akela).
 SESSION_KEYBOARD = {"inline_keyboard": [
-    [{"text": "2023-27 (Sem-VII)", "callback_data": "sess_2327"}],
-    [{"text": "2024-28 (Sem-V)", "callback_data": "sess_2428"}],
-    [{"text": "2025-29 (Sem-III)", "callback_data": "sess_2529"}],
-    [{"text": "2026-30 (Sem-I)", "callback_data": "sess_2630"}],
-    [{"text": "⬅ Menu", "callback_data": "menu"}],
+    [{"text": "2023-27", "callback_data": "sess_2327"},
+     {"text": "2024-28", "callback_data": "sess_2428"}],
+    [{"text": "2025-29", "callback_data": "sess_2529"},
+     {"text": "2026-30", "callback_data": "sess_2630"}],
+    [{"text": "⬅ Back", "callback_data": "menu"}],
 ]}
 
 # (button label, topic key) — har session ke liye same sawal.
@@ -514,10 +512,11 @@ SESSION_QUESTION_BUTTONS = [
 
 
 def session_label(sess_key):
-    """e.g. "2327" -> "2023-27 (Sem-VII)", or "" for an unknown key."""
-    for key, sess, sem in SESSIONS:
+    """e.g. "2327" -> "2023-27" (sirf session name, semester nahi),
+    or "" for an unknown key."""
+    for key, sess, _ in SESSIONS:
         if key == sess_key:
-            return "%s (%s)" % (sess, sem)
+            return sess
     return ""
 
 
