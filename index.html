@@ -78,7 +78,7 @@
         var path = window.location.pathname || "/";
         path = path.replace(/\/index\.html?$/i, "/");
         var parts = path.split("/").filter(function (s) { return s.length > 0; });
-        var keys = ["2023-27", "2024-28", "2025-29", "2026-30", "admission", "exam-form", "deadlines", "result"];
+        var keys = ["2023-27", "2024-28", "2025-29", "2026-30", "admission", "exam-form", "deadlines", "result", "privacy", "about", "contact"];
         if (parts.length >= 2 && parts[parts.length - 2] === "update") parts.length -= 2;
         else if (parts.length && keys.indexOf(parts[parts.length - 1]) !== -1) parts.length -= 1;
         var base = document.createElement("base");
@@ -1663,6 +1663,125 @@
         </div>
       </div>
 
+      <!-- ================= PRIVACY VIEW (/privacy) ================= -->
+      <div id="view-privacy" class="hidden">
+        <a class="backlink" href="/">← Back to Home</a>
+        <div class="guide">
+          <div class="portal-banner">
+            <h2>Privacy Policy</h2>
+            <p>How Wazirganj College Updates handles your information. Last updated: 21 November 2026.</p>
+          </div>
+
+          <div class="guide-card">
+            <section class="guide-sec" aria-labelledby="prv-1-h" style="margin-top:0">
+              <h2 id="prv-1-h">Information we collect</h2>
+              <ul class="guide-notes">
+                <li><b>Analytics:</b> We use Vercel Analytics to see anonymous, aggregated usage — which pages students visit, device type and approximate region. It does not use cookies for tracking and does not collect your name, phone number, email, roll number or documents.</li>
+                <li><b>Notifications:</b> If you allow notifications, OneSignal stores a subscription so we can send new-notice alerts. You can turn notifications off anytime in your browser settings.</li>
+                <li><b>No accounts:</b> This website has no login or sign-up. We never ask for your password, OTP, roll number, Aadhaar number or bank details.</li>
+                <li><b>Messages:</b> If you contact us on Telegram, WhatsApp or Instagram, we see only what you send us.</li>
+                <li><b>Donations:</b> We do not accept donations.</li>
+              </ul>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="prv-2-h">
+              <h2 id="prv-2-h">Cookies and advertising</h2>
+              <p>Third-party vendors, including Google, use cookies to serve ads based on your prior visits to this website or other websites. Google's use of advertising cookies enables it and its partners to serve ads to you based on your visit to this site and/or other sites on the Internet. You may opt out of personalised advertising by visiting <a href="https://www.google.com/settings/ads" target="_blank" rel="noreferrer">Google Ads Settings</a> or <a href="https://www.aboutads.info/choices" target="_blank" rel="noreferrer">www.aboutads.info/choices</a>. Advertising may be shown on this website in the future; this section applies when it is.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="prv-3-h">
+              <h2 id="prv-3-h">How information is used and shared</h2>
+              <p>Usage data helps us keep notices and last dates up to date and understand which pages students use. We do not sell personal information. Analytics and notification providers process data under their own privacy policies.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="prv-4-h">
+              <h2 id="prv-4-h">External links</h2>
+              <p>This website links to the official Wazirganj College and Magadh University portals. Their privacy practices are their own.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="prv-5-h">
+              <h2 id="prv-5-h">Children's privacy</h2>
+              <p>This website is meant for college students. We do not knowingly collect personal information from children.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="prv-6-h">
+              <h2 id="prv-6-h">Changes to this policy</h2>
+              <p>This policy may be updated when needed. The date at the top shows the latest version.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="prv-7-h">
+              <h2 id="prv-7-h">Contact</h2>
+              <p>Questions about this policy? Reach us through the <a href="/contact">Contact</a> page.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= ABOUT VIEW (/about) ================= -->
+      <div id="view-about" class="hidden">
+        <a class="backlink" href="/">← Back to Home</a>
+        <div class="guide">
+          <div class="portal-banner">
+            <h2>About Wazirganj College Updates</h2>
+            <p>An independent student updates page for Wazirganj College, Wazirganj (Gaya).</p>
+          </div>
+
+          <div class="guide-card">
+            <section class="guide-sec" aria-labelledby="abt-1-h" style="margin-top:0">
+              <h2 id="abt-1-h">What this website is</h2>
+              <p>Wazirganj College Updates is an independent student updates page for Wazirganj College, Wazirganj (Gaya), affiliated to Magadh University, Bodh Gaya. It is run by Veeru Verma, a student of the college. <b>This is not the official website of Wazirganj College or Magadh University.</b></p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="abt-2-h">
+              <h2 id="abt-2-h">What we publish</h2>
+              <p>Exam form last dates, exam programmes, results and marksheets, admission updates, holidays and scholarships (such as PMS) — for U.G. sessions 2023-27, 2024-28, 2025-29 and 2026-30. Notices come from the college and Magadh University. Always verify dates and details on the official portals before acting.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="abt-3-h">
+              <h2 id="abt-3-h">Our channels</h2>
+              <ul class="guide-notes">
+                <li><a href="https://t.me/wazirganj_collegeinfo" target="_blank" rel="noreferrer"><b>Telegram:</b> t.me/wazirganj_collegeinfo</a></li>
+                <li><a href="https://whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q" target="_blank" rel="noreferrer"><b>WhatsApp Channel</b></a></li>
+                <li><a href="https://www.instagram.com/wazirganj_college" target="_blank" rel="noreferrer"><b>Instagram:</b> @wazirganj_college</a></li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= CONTACT VIEW (/contact) ================= -->
+      <div id="view-contact" class="hidden">
+        <a class="backlink" href="/">← Back to Home</a>
+        <div class="guide">
+          <div class="portal-banner">
+            <h2>Contact</h2>
+            <p>Reach Wazirganj College Updates on any of these channels.</p>
+          </div>
+
+          <div class="guide-card">
+            <section class="guide-sec" aria-labelledby="cnt-1-h" style="margin-top:0">
+              <h2 id="cnt-1-h">Reach us</h2>
+              <ul class="guide-notes">
+                <li><a href="https://t.me/wazirganj_collegeinfo" target="_blank" rel="noreferrer"><b>Telegram channel:</b> t.me/wazirganj_collegeinfo</a></li>
+                <li><a href="https://whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q" target="_blank" rel="noreferrer"><b>WhatsApp channel</b></a></li>
+                <li><a href="https://www.instagram.com/wazirganj_college" target="_blank" rel="noreferrer"><b>Instagram:</b> @wazirganj_college</a> (DMs answered in English)</li>
+              </ul>
+              <p style="margin-top:12px">College questions are also answered on the Telegram discussion group and on WhatsApp Business chat.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="cnt-2-h">
+              <h2 id="cnt-2-h">Please do not share</h2>
+              <p>Never share your password, OTP, roll number, Aadhaar number or bank details with anyone. This website never asks for them.</p>
+            </section>
+
+            <section class="guide-sec" aria-labelledby="cnt-3-h">
+              <h2 id="cnt-3-h">Official contacts</h2>
+              <p>For official matters, please use the college website and Magadh University portal links in the footer below.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+
       <!-- ================= DEADLINES VIEW (/deadlines) ================= -->
       <div id="view-deadlines" class="hidden">
         <a class="backlink" href="/">← Back to Home</a>
@@ -1812,6 +1931,9 @@
           <a href="https://wazirganjcollege.in" target="_blank" rel="noreferrer">College Official Website</a>
           <a href="https://www.magadhonline.in" target="_blank" rel="noreferrer">Magadh University Exam Portal</a>
           <a href="https://wazirganjcollege.edmitr.in/" target="_blank" rel="noreferrer">College Admission Portal</a>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
         </div>
         <p class="disclaimer-note"><b>Disclaimer:</b> This is an independent student updates page and not the official website of Wazirganj College. Students are advised to verify all dates and details on the official College and Magadh University portals before acting.</p>
       </div>
@@ -2337,7 +2459,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         UPDATES.forEach(function (x) { if (x.slug === slug) u = x; });
         var home = document.getElementById("view-home");
         var detail = document.getElementById("view-detail");
-        if (!u) { home.classList.remove("hidden"); detail.classList.add("hidden"); document.getElementById("view-session").classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.getElementById("view-result").classList.add("hidden"); document.getElementById("view-exam").classList.add("hidden"); document.title = DEFAULT_TITLE; return; }
+        if (!u) { home.classList.remove("hidden"); detail.classList.add("hidden"); document.getElementById("view-session").classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.getElementById("view-result").classList.add("hidden"); document.getElementById("view-exam").classList.add("hidden"); document.title = DEFAULT_TITLE; return; }
         var h = '<div class="badges">' + sessionBadgeHTML(u);
         if (u.important) h += '<span class="badge important">Important</span>';
         h += '<span class="badge date">' + fmtDate(u.date) + "</span></div>";
@@ -2363,7 +2485,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         if (u.lastDate) startDetailCountdown(u.lastDate); else stopCountdown();
         home.classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
-        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
         document.getElementById("view-result").classList.add("hidden");
@@ -2382,7 +2504,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         var detail = document.getElementById("view-detail");
         var view = document.getElementById("view-session");
         var valid = SESSION_KEYS.indexOf(key) !== -1;
-        if (!valid) { view.classList.add("hidden"); detail.classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.getElementById("view-result").classList.add("hidden"); document.getElementById("view-exam").classList.add("hidden"); home.classList.remove("hidden"); return; }
+        if (!valid) { view.classList.add("hidden"); detail.classList.add("hidden"); document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden"); document.getElementById("view-examform").classList.add("hidden"); document.getElementById("view-deadlines").classList.add("hidden"); document.getElementById("view-result").classList.add("hidden"); document.getElementById("view-exam").classList.add("hidden"); home.classList.remove("hidden"); return; }
         var title = "U.G. Session " + sessionPretty(key);
         var list = UPDATES.filter(function (u) { return relatedToSession(u, key); });
         var h = '<div class="session-head"><div class="badges"><span class="badge session">' + esc(title) + "</span></div>";
@@ -2408,7 +2530,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("session-content").innerHTML = h;
         home.classList.add("hidden");
         detail.classList.add("hidden");
-        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
         document.getElementById("view-result").classList.add("hidden");
@@ -2423,6 +2545,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
          details / instructions. Home ke Student Services tiles yahi
          kholte hain; portal par jaana banner ke button se hota hai. */
       function showPage(page) {
+        var titles = { "admission": "Apply for Admission", "exam-form": "Fill Exam Form", "privacy": "Privacy Policy", "about": "About", "contact": "Contact" };
         document.getElementById("view-home").classList.add("hidden");
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
@@ -2431,7 +2554,10 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-exam").classList.add("hidden");
         document.getElementById("view-admission").classList.toggle("hidden", page !== "admission");
         document.getElementById("view-examform").classList.toggle("hidden", page !== "exam-form");
-        document.title = (page === "admission" ? "Apply for Admission" : "Fill Exam Form") + " \u2014 Wazirganj College Updates";
+        document.getElementById("view-privacy").classList.toggle("hidden", page !== "privacy");
+        document.getElementById("view-about").classList.toggle("hidden", page !== "about");
+        document.getElementById("view-contact").classList.toggle("hidden", page !== "contact");
+        document.title = (titles[page] || "Wazirganj College Updates") + " \u2014 Wazirganj College Updates";
         window.scrollTo(0, 0);
       }
       /* ---------- Deadlines page (/deadlines) ----------
@@ -2443,7 +2569,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-home").classList.add("hidden");
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
-        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-result").classList.add("hidden");
         document.getElementById("view-exam").classList.add("hidden");
@@ -2481,7 +2607,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-home").classList.add("hidden");
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
-        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
         document.getElementById("view-exam").classList.add("hidden");
@@ -2502,7 +2628,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         document.getElementById("view-home").classList.add("hidden");
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
-        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
         document.getElementById("view-result").classList.add("hidden");
@@ -2562,7 +2688,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         if (last === "exam") {
           return { type: "exam" };
         }
-        if (last === "admission" || last === "exam-form") {
+        if (last === "admission" || last === "exam-form" || last === "privacy" || last === "about" || last === "contact") {
           return { type: "page", page: last };
         }
         if (SESSION_KEYS.indexOf(last) !== -1) {
@@ -2595,7 +2721,7 @@ const LINKS = [{"label": "Sem-I Result (2025–29)", "url": "https://www.magadho
         if (r.type === "exam") { showExam(); return; }
         document.getElementById("view-detail").classList.add("hidden");
         document.getElementById("view-session").classList.add("hidden");
-        document.getElementById("view-admission").classList.add("hidden");
+        document.getElementById("view-admission").classList.add("hidden"); document.getElementById("view-privacy").classList.add("hidden"); document.getElementById("view-about").classList.add("hidden"); document.getElementById("view-contact").classList.add("hidden");
         document.getElementById("view-examform").classList.add("hidden");
         document.getElementById("view-deadlines").classList.add("hidden");
         document.getElementById("view-result").classList.add("hidden");

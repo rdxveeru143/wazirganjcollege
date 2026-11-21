@@ -61,6 +61,24 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://wazirganjcollege.vercel.app/privacy</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://wazirganjcollege.vercel.app/about</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://wazirganjcollege.vercel.app/contact</loc>
+    <lastmod>2026-11-21</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://wazirganjcollege.vercel.app/update/aavashyak-suchna-sem5-sem3-exam-form-2026-11-10</loc>
     <lastmod>2026-11-10</lastmod>
     <changefreq>monthly</changefreq>
