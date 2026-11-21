@@ -249,10 +249,10 @@ def ai_rephrase(question, fact):
 
 
 def past_qa_lines():
-    """Past Q&A pairs (from the menu's sample questions) — the bot's
+    """Past Q&A pairs (from sample questions) — the bot's
     memory of how questions were answered before. Auto-train input."""
     lines = []
-    for q in CALLBACK_QUESTIONS.values():
+    for q in PAST_QA_QUESTIONS:
         a = find_answer(q)
         if a and a is not A_FALLBACK:
             lines.append("Q: %s | A: %s" % (q, a))
@@ -271,11 +271,12 @@ def final_answer(question, canned):
 
 
 def send_menu(chat_id, reply_to=None):
-    return send_message(chat_id, MENU_TEXT, reply_to=reply_to,
-                        markup=MENU_KEYBOARD)
+    return send_message(chat_id, JOIN_TEXT, reply_to=reply_to)
 
 
 def handle_callback(cq):
+    # No panels anymore — but messages already sent keep their buttons.
+    # Any tap on one retires that message to the Join text.
     sender = cq.get("from", {})
     if sender.get("is_bot"):
         return
@@ -283,34 +284,8 @@ def handle_callback(cq):
     chat = msg.get("chat", {})
     if chat.get("id") != GROUP_CHAT_ID:
         return
-    data_cb = cq.get("data", "")
     answer_callback(cq["id"])
-    if data_cb == "menu":
-        text, markup = MENU_TEXT, MENU_KEYBOARD
-    elif data_cb == "ask":
-        text, markup = SESSION_TEXT, SESSION_KEYBOARD
-    elif data_cb.startswith("sess_"):
-        key = data_cb[5:]
-        if not session_label(key):
-            return
-        text, markup = (session_question_text(key),
-                        session_question_keyboard(key))
-    elif data_cb.startswith("q_"):
-        parts = data_cb[2:].split("_", 1)
-        if len(parts) != 2 or not session_label(parts[0]):
-            return
-        q = session_question_sample(parts[0], parts[1])
-        if not q:
-            return
-        text = final_answer(q, find_answer(q) or A_FALLBACK)
-        markup = session_question_back_keyboard(parts[0])
-    elif data_cb in CALLBACK_QUESTIONS:
-        q = CALLBACK_QUESTIONS[data_cb]
-        text = final_answer(q, find_answer(q) or A_FALLBACK)
-        markup = BACK_KEYBOARD
-    else:
-        return
-    edit_message(chat["id"], msg.get("message_id"), text, markup=markup)
+    edit_message(chat["id"], msg.get("message_id"), JOIN_TEXT)
 
 
 def handle_message(msg):
@@ -430,147 +405,35 @@ A_FALLBACK = (
 )
 
 # ---------------------------------------------------------------------------
-# /menu panel: inline-keyboard buttons in the group. /menu shows the panel;
-# tapping a button edits that same message to the answer, with a Back button.
-# Button answers reuse find_answer via a sample question, so button and
-# text answers always stay identical.
+# NO PANELS (21 Nov 2026, Veeru's word: "Panel htake sare" — nobody uses
+# the Menu button). There are no inline keyboards anymore: /menu sends a
+# plain text message, "Join On WhatsApp" with the WhatsApp channel link.
+# The bot only answers typed questions now.
 # ---------------------------------------------------------------------------
 
-MENU_TEXT = (
+JOIN_TEXT = (
     "Wazirganj College Updates\n\n"
-    "Sawal puchne se pehle yahan check zaroor karen 👇\n\n"
-    "📱 WhatsApp Channel: "
-    "https://whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q\n"
+    "Join On WhatsApp 👇\n"
+    "https://whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q\n\n"
     "🌐 Website: https://wazirganjcollege.vercel.app\n\n"
     "Managed by @veeruverma"
 )
 
-# Starting panel (21 Nov 2026, Veeru's word): SIRF ❓ Ask Me Question.
-# Baaki topics (PMS, admission, teacher, office) ke buttons starting
-# panel se hata diye — type karke sawal puchne par unke jawab abhi bhi
-# milte hain, aur purane menu messages ke buttons bhi kaam karte hain.
-MENU_KEYBOARD = {"inline_keyboard": [
-    [{"text": "❓ Ask Me Question", "callback_data": "ask"}],
-]}
-
-BACK_KEYBOARD = {"inline_keyboard": [
-    [{"text": "⬅ Menu", "callback_data": "menu"}],
-]}
-
-# callback_data -> sample question (routed through find_answer).
-CALLBACK_QUESTIONS = {
-    "exam_dates": "exam form ki last date kya hai",
-    "programme": "sem 3 ka exam programme",
-    "admit": "admit card kab aayega",
-    "fee": "exam form ki fee kitni hai",
-    "pms": "pms scholarship ki last date kya hai",
-    "admission_docs": "admission ke liye documents kya chahiye",
-    "admission_last": "admission ki last date kya hai",
-    "teacher": "sir ka number chahiye",
-    "office": "college office kab khulta hai",
-    "all_dates": "saari last dates batao",
-}
-
-# ---------------------------------------------------------------------------
-# "Ask Me Question" flow (21 Nov 2026, Veeru's word): /menu ke sabse upar
-# ❓ Ask Me Question button; usse session panel (2023-27 se 2026-30 tak);
-# session tap karne par us session ke sawalon ka panel. Har sawal ka jawab
-# find_answer se aata hai (sample question ke through), isliye button aur
-# text wale jawab hamesha ek jaise rehte hain.
-# ---------------------------------------------------------------------------
-
-SESSIONS = [
-    ("2327", "2023-27", "Sem-VII"),
-    ("2428", "2024-28", "Sem-V"),
-    ("2529", "2025-29", "Sem-III"),
-    ("2630", "2026-30", "Sem-I"),
+# Sample questions (routed through find_answer) — past Q&A memory for the
+# webhook's AI grounding. Replaces the old CALLBACK_QUESTIONS, which died
+# with the panels.
+PAST_QA_QUESTIONS = [
+    "exam form ki last date kya hai",
+    "sem 3 ka exam programme",
+    "admit card kab aayega",
+    "exam form ki fee kitni hai",
+    "pms scholarship ki last date kya hai",
+    "admission ke liye documents kya chahiye",
+    "admission ki last date kya hai",
+    "sir ka number chahiye",
+    "college office kab khulta hai",
+    "saari last dates batao",
 ]
-
-SESSION_TEXT = (
-    "Wazirganj College Updates\n\n"
-    "Apna session chunen:"
-)
-
-# Session panel (21 Nov 2026, Veeru's word): SIRF session name, semester
-# nahi. Charo session 2 line me (har line me 2), aur niche ek bada
-# Back button (poori line me akela).
-SESSION_KEYBOARD = {"inline_keyboard": [
-    [{"text": "2023-27", "callback_data": "sess_2327"},
-     {"text": "2024-28", "callback_data": "sess_2428"}],
-    [{"text": "2025-29", "callback_data": "sess_2529"},
-     {"text": "2026-30", "callback_data": "sess_2630"}],
-    [{"text": "⬅ Back", "callback_data": "menu"}],
-]}
-
-# (button label, topic key) — har session ke liye same sawal.
-SESSION_QUESTION_BUTTONS = [
-    ("📝 Exam Form Last Date", "lastdate"),
-    ("📅 Exam Programme", "programme"),
-    ("🎫 Admit Card", "admit"),
-    ("💰 Exam Fee", "fee"),
-    ("📝 Form Kaise Bharen?", "how"),
-    ("💳 Payment Nahi Kat Raha", "payment"),
-    ("📋 All Last Dates", "alldates"),
-]
-
-
-def session_label(sess_key):
-    """e.g. "2327" -> "2023-27" (sirf session name, semester nahi),
-    or "" for an unknown key."""
-    for key, sess, _ in SESSIONS:
-        if key == sess_key:
-            return sess
-    return ""
-
-
-def session_question_keyboard(sess_key):
-    rows = [[{"text": label,
-              "callback_data": "q_%s_%s" % (sess_key, topic)}]
-            for label, topic in SESSION_QUESTION_BUTTONS]
-    rows.append([{"text": "⬅ Sessions", "callback_data": "ask"},
-                 {"text": "⬅ Menu", "callback_data": "menu"}])
-    return {"inline_keyboard": rows}
-
-
-def session_question_text(sess_key):
-    return ("Session %s — kya janna hai? Neeche se chunen:"
-            % session_label(sess_key))
-
-
-def session_question_sample(sess_key, topic):
-    """Sample question for one session + topic, or None."""
-    sess = ""
-    for key, s, _ in SESSIONS:
-        if key == sess_key:
-            sess = s
-    if not sess:
-        return None
-    samples = {
-        "lastdate": "%s exam form ki last date kya hai" % sess,
-        "programme": "%s ka exam programme kya hai" % sess,
-        "admit": "%s ka admit card kab aayega" % sess,
-        "fee": "%s ki exam fee kitni hai" % sess,
-        "how": "%s ka exam form kaise bharen" % sess,
-        "payment": "%s ka payment nahi kat raha hai" % sess,
-        "alldates": "saari last dates batao",
-    }
-    return samples.get(topic)
-
-
-def session_question_answer(sess_key, topic):
-    """Answer for one session + topic button, via find_answer."""
-    q = session_question_sample(sess_key, topic)
-    if not q:
-        return None
-    return find_answer(q) or A_FALLBACK
-
-
-def session_question_back_keyboard(sess_key):
-    """Back row shown under a per-session question's answer."""
-    return {"inline_keyboard": [
-        [{"text": "⬅ Questions", "callback_data": "sess_" + sess_key},
-         {"text": "⬅ Menu", "callback_data": "menu"}],
-    ]}
 
 # Intent keyword groups (21 Nov 2026 intent-first fix). find_answer checks
 # the INTENT of the question first (admit? fee? payment? programme?) and
