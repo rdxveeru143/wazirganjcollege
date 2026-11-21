@@ -287,6 +287,23 @@ def handle_callback(cq):
     answer_callback(cq["id"])
     if data_cb == "menu":
         text, markup = MENU_TEXT, MENU_KEYBOARD
+    elif data_cb == "ask":
+        text, markup = SESSION_TEXT, SESSION_KEYBOARD
+    elif data_cb.startswith("sess_"):
+        key = data_cb[5:]
+        if not session_label(key):
+            return
+        text, markup = (session_question_text(key),
+                        session_question_keyboard(key))
+    elif data_cb.startswith("q_"):
+        parts = data_cb[2:].split("_", 1)
+        if len(parts) != 2 or not session_label(parts[0]):
+            return
+        q = session_question_sample(parts[0], parts[1])
+        if not q:
+            return
+        text = final_answer(q, find_answer(q) or A_FALLBACK)
+        markup = session_question_back_keyboard(parts[0])
     elif data_cb in CALLBACK_QUESTIONS:
         q = CALLBACK_QUESTIONS[data_cb]
         text = final_answer(q, find_answer(q) or A_FALLBACK)
@@ -349,7 +366,7 @@ A_ADMIT = (
     "Sem-III (Session 2025-29) का Admit Card अभी जारी नहीं हुआ है। Admit Card के लिए 75% attendance और Internal Exam में pass होना ज़रूरी है। जैसे ही जारी होगा, सूचित कर दिया जाएगा।"
 )
 
-A_FEE = "Sem-III (Session 2025-29) के Exam Form की fee Rs. 800 है।"
+A_FEE = "Exam Form की fee Rs. 800 है (सभी sessions और semesters के लिए)।"
 
 A_OFFICE = (
     "Exam Form के लिए college office प्रतिदिन सुबह 10:00 बजे से दोपहर 3:00 बजे तक खुला रहता है।"
@@ -425,6 +442,7 @@ MENU_TEXT = (
 )
 
 MENU_KEYBOARD = {"inline_keyboard": [
+    [{"text": "❓ Ask Me Question", "callback_data": "ask"}],
     [{"text": "📝 Exam Form Last Dates", "callback_data": "exam_dates"},
      {"text": "📅 Exam Programme", "callback_data": "programme"}],
     [{"text": "🎫 Admit Card", "callback_data": "admit"},
@@ -454,6 +472,103 @@ CALLBACK_QUESTIONS = {
     "office": "college office kab khulta hai",
     "all_dates": "saari last dates batao",
 }
+
+# ---------------------------------------------------------------------------
+# "Ask Me Question" flow (21 Nov 2026, Veeru's word): /menu ke sabse upar
+# ❓ Ask Me Question button; usse session panel (2023-27 se 2026-30 tak);
+# session tap karne par us session ke sawalon ka panel. Har sawal ka jawab
+# find_answer se aata hai (sample question ke through), isliye button aur
+# text wale jawab hamesha ek jaise rehte hain.
+# ---------------------------------------------------------------------------
+
+SESSIONS = [
+    ("2327", "2023-27", "Sem-VII"),
+    ("2428", "2024-28", "Sem-V"),
+    ("2529", "2025-29", "Sem-III"),
+    ("2630", "2026-30", "Sem-I"),
+]
+
+SESSION_TEXT = (
+    "Wazirganj College Updates\n\n"
+    "Apna session chunen:"
+)
+
+SESSION_KEYBOARD = {"inline_keyboard": [
+    [{"text": "2023-27 (Sem-VII)", "callback_data": "sess_2327"}],
+    [{"text": "2024-28 (Sem-V)", "callback_data": "sess_2428"}],
+    [{"text": "2025-29 (Sem-III)", "callback_data": "sess_2529"}],
+    [{"text": "2026-30 (Sem-I)", "callback_data": "sess_2630"}],
+    [{"text": "⬅ Menu", "callback_data": "menu"}],
+]}
+
+# (button label, topic key) — har session ke liye same sawal.
+SESSION_QUESTION_BUTTONS = [
+    ("📝 Exam Form Last Date", "lastdate"),
+    ("📅 Exam Programme", "programme"),
+    ("🎫 Admit Card", "admit"),
+    ("💰 Exam Fee", "fee"),
+    ("📝 Form Kaise Bharen?", "how"),
+    ("💳 Payment Nahi Kat Raha", "payment"),
+    ("📋 All Last Dates", "alldates"),
+]
+
+
+def session_label(sess_key):
+    """e.g. "2327" -> "2023-27 (Sem-VII)", or "" for an unknown key."""
+    for key, sess, sem in SESSIONS:
+        if key == sess_key:
+            return "%s (%s)" % (sess, sem)
+    return ""
+
+
+def session_question_keyboard(sess_key):
+    rows = [[{"text": label,
+              "callback_data": "q_%s_%s" % (sess_key, topic)}]
+            for label, topic in SESSION_QUESTION_BUTTONS]
+    rows.append([{"text": "⬅ Sessions", "callback_data": "ask"},
+                 {"text": "⬅ Menu", "callback_data": "menu"}])
+    return {"inline_keyboard": rows}
+
+
+def session_question_text(sess_key):
+    return ("Session %s — kya janna hai? Neeche se chunen:"
+            % session_label(sess_key))
+
+
+def session_question_sample(sess_key, topic):
+    """Sample question for one session + topic, or None."""
+    sess = ""
+    for key, s, _ in SESSIONS:
+        if key == sess_key:
+            sess = s
+    if not sess:
+        return None
+    samples = {
+        "lastdate": "%s exam form ki last date kya hai" % sess,
+        "programme": "%s ka exam programme kya hai" % sess,
+        "admit": "%s ka admit card kab aayega" % sess,
+        "fee": "%s ki exam fee kitni hai" % sess,
+        "how": "%s ka exam form kaise bharen" % sess,
+        "payment": "%s ka payment nahi kat raha hai" % sess,
+        "alldates": "saari last dates batao",
+    }
+    return samples.get(topic)
+
+
+def session_question_answer(sess_key, topic):
+    """Answer for one session + topic button, via find_answer."""
+    q = session_question_sample(sess_key, topic)
+    if not q:
+        return None
+    return find_answer(q) or A_FALLBACK
+
+
+def session_question_back_keyboard(sess_key):
+    """Back row shown under a per-session question's answer."""
+    return {"inline_keyboard": [
+        [{"text": "⬅ Questions", "callback_data": "sess_" + sess_key},
+         {"text": "⬅ Menu", "callback_data": "menu"}],
+    ]}
 
 # Intent keyword groups (21 Nov 2026 intent-first fix). find_answer checks
 # the INTENT of the question first (admit? fee? payment? programme?) and
@@ -487,6 +602,12 @@ SESSION_5 = ["2024-28", "2024 28", "sem-v", "sem v", "sem-5", "sem 5",
              "sem5", "semester 5", "5th sem", "5th semester"]
 SESSION_3 = ["2025-29", "2025 29", "sem-iii", "sem iii", "sem-3", "sem 3",
              "sem3", "semester 3", "3rd sem", "3rd semester"]
+# Sem-I (2026-30): newest session. No exam-form / programme / admit-card
+# fact is known for it yet — those questions fall through to the AI
+# fallback instead of borrowing another session's fact. ("sem i" is
+# deliberately NOT listed: it is a substring of "sem iii".)
+SESSION_1 = ["2026-30", "2026 30", "sem-1", "sem 1",
+             "sem1", "semester 1", "1st sem", "1st semester"]
 PROGRAMME_KW = ["programme", "program", "कार्यक्रम", "date sheet",
                 "datesheet", "time table", "टाइम टेबल", "परीक्षा तिथि",
                 "exam date"]
@@ -508,14 +629,17 @@ COLLEGE_KEYWORDS = [
 
 
 def _session_of(t):
-    """Which session the question names: 7, 5, 3, or None. Sem-VII is
-    checked first because "sem vii" contains "sem v" as a substring."""
+    """Which session the question names: 7, 5, 3, 1, or None. Sem-VII is
+    checked first because "sem vii" contains "sem v" as a substring, and
+    Sem-III before Sem-I because "sem iii" contains "sem i"."""
     if any(k in t for k in SESSION_7):
         return 7
     if any(k in t for k in SESSION_5):
         return 5
     if any(k in t for k in SESSION_3):
         return 3
+    if any(k in t for k in SESSION_1):
+        return 1
     return None
 
 
@@ -575,22 +699,25 @@ def find_answer(text):
         ans = _session_form_answer(session)
         if ans is not None:
             return ans
+        if session == 1:
+            # Sem-I (2026-30): no exam-form date announced yet — AI tries
+            # the live notices instead of listing other sessions' dates.
+            return A_FALLBACK
         return A_DEADLINES
-    # 5. Admit Card: only Sem-III's status is known. Sem-V / Sem-VII ->
-    # fallback (AI tries the live notices) instead of the Sem-III answer.
+    # 5. Admit Card: only Sem-III's status is known. Sem-I / Sem-V /
+    # Sem-VII -> fallback (AI tries the live notices) instead of the
+    # Sem-III answer.
     if any(k in t for k in ADMIT_KW):
-        if session in (5, 7):
+        if session in (1, 5, 7):
             return A_FALLBACK
         return A_ADMIT
     # 6. Programme: only the Sem-III programme is known.
     if any(k in t for k in PROGRAMME_KW):
-        if session in (5, 7):
+        if session in (1, 5, 7):
             return A_FALLBACK
         return A_PROGRAMME
-    # 7. Fee: only the Sem-III fee (Rs. 800) is known.
+    # 7. Fee: Rs. 800 for ALL sessions/semesters (Veeru's word, 21 Nov 2026).
     if any(k in t for k in FEE_KW):
-        if session in (5, 7):
-            return A_FALLBACK
         return A_FEE
     # 8. Payment: "nahi kat raha" -> validate-wait answer; "kat gaya" or
     # any other payment question -> fallback (AI), never the opposite answer.
@@ -639,6 +766,8 @@ def find_answer(text):
         ans = _session_form_answer(session)
         if ans is not None:
             return ans
+        if session == 1:
+            return A_FALLBACK
         return A_FORM_GENERIC
     if any(k in t for k in COLLEGE_KEYWORDS):
         return A_FALLBACK
