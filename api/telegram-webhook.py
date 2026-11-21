@@ -29,6 +29,7 @@ replacement because its systemd unit lives in ephemeral /etc.
 import json
 import os
 import re
+import time
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler
@@ -270,6 +271,94 @@ def final_answer(question, canned):
     return ai_rephrase(question, canned)
 
 
+def tg_result(method, payload):
+    """Call one Bot API method, return its result dict, or None."""
+    if not TOKEN:
+        return None
+    try:
+        req = urllib.request.Request(
+            API + "/" + method,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=10) as r:
+            return json.loads(r.read().decode("utf-8")).get("result")
+    except Exception as e:  # noqa: BLE001 - log type only, never body/URL
+        print("telegram-webhook: %s failed: %s" % (method, type(e).__name__))
+        return None
+
+
+def is_admin(user_id):
+    """True if the user is the group's creator or an administrator."""
+    if not user_id:
+        return False
+    member = tg_result("getChatMember",
+                       {"chat_id": GROUP_CHAT_ID, "user_id": user_id})
+    return bool(member) and member.get("status") in (
+        "creator", "administrator")
+
+
+# /stop pause (21 Nov 2026, Veeru's word). In-memory ONLY — the bot
+# cannot pin messages (can_pin_messages is False), so there is no
+# durable store for the pause; a Vercel cold start ends it early.
+# Best-effort 5 minutes; the group stays active, so the warm instance
+# normally carries the full pause.
+PAUSED_UNTIL = 0.0
+PAUSE_SECONDS = 300
+
+
+def is_paused():
+    return time.time() < PAUSED_UNTIL
+
+
+def handle_admin_command(msg):
+    """Admin-only commands /stop and /text. Returns True if the message
+    was one of them (handled or silently ignored), else False.
+
+    /stop — stops the bot's replies for 5 minutes; sends one
+    confirmation, then silence. /stop again restarts the 5 minutes.
+    /text — only when an admin replies to (tags) a message with
+    "/text <message>": the bot sends that message as its own reply to
+    the tagged message, then deletes the admin's /text message (so
+    students see only the bot's reply). Both admin-only; anyone else
+    is silently ignored.
+    """
+    global PAUSED_UNTIL
+    chat = msg.get("chat", {})
+    sender = msg.get("from", {})
+    text = msg.get("text") or ""
+    cmd = text.strip().split()[0].lower() if text.strip() else ""
+    if cmd not in ("/stop", "/stop@wcu_assistantbot",
+                   "/text", "/text@wcu_assistantbot"):
+        return False
+    if not is_admin(sender.get("id")):
+        return True
+    if cmd in ("/stop", "/stop@wcu_assistantbot"):
+        PAUSED_UNTIL = time.time() + PAUSE_SECONDS
+        until_ist = time.strftime("%H:%M",
+                                  time.gmtime(PAUSED_UNTIL + 19800))
+        send_message(chat["id"],
+                     "⏸️ Bot 5 minute ke liye band hai — %s IST tak "
+                     "koi jawab nahi dega।" % until_ist,
+                     reply_to=msg.get("message_id"))
+        print("telegram-webhook: paused by admin until %s IST" % until_ist)
+        return True
+    target = msg.get("reply_to_message") or {}
+    parts = text.strip().split(None, 1)
+    body = parts[1].strip() if len(parts) > 1 else ""
+    if not target or not body:
+        return True
+    ok = send_message(chat["id"], body,
+                      reply_to=target.get("message_id"))
+    if ok:
+        tg("deleteMessage", {"chat_id": chat["id"],
+                             "message_id": msg.get("message_id")})
+        print("telegram-webhook: relayed /text to msg %s; command deleted"
+              % target.get("message_id"))
+    return True
+
+
 def send_menu(chat_id, reply_to=None):
     return send_message(chat_id, JOIN_TEXT, reply_to=reply_to)
 
@@ -301,6 +390,12 @@ def handle_message(msg):
     if not text:
         return
     cmd = text.strip().split()[0].lower() if text.strip() else ""
+    # Admin commands work even while paused; everything else stops
+    # while the bot is paused.
+    if handle_admin_command(msg):
+        return
+    if is_paused():
+        return
     if cmd in ("/menu", "/menu@wcu_assistantbot"):
         send_menu(chat["id"], reply_to=msg.get("message_id"))
         return
