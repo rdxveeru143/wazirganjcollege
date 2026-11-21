@@ -399,6 +399,14 @@ A_FORM_GENERIC = (
     "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal अभी नहीं खुला है (Last Date 19/11/2026)। Exam Form के लिए हमारी website देखें: wazirganjcollege.vercel.app"
 )
 
+# NEW (21 Nov 2026, intent-first fix): "form kaise bharen" ka jawab — pehle
+# ye sawaal session ki last date me kho jata tha. Sirf itna hi kehte hain
+# jo pakka pata hai: form ONLINE bhara jata hai, steps + link website par.
+A_FORM_HOW = (
+    "Exam Form ONLINE bhara jata hai। Form bharne ke steps aur link के लिए "
+    "हमारी website देखें: wazirganjcollege.vercel.app"
+)
+
 A_FALLBACK = (
     "इस विषय में अभी तक college से कोई सूचना नहीं आई है। जैसे ही सूचना आएगी, channel पर बता दिया जाएगा — कृपया wait करें।"
 )
@@ -447,27 +455,31 @@ CALLBACK_QUESTIONS = {
     "all_dates": "saari last dates batao",
 }
 
-# (keywords, answer) — first matching rule wins.
-# Private-data refusal, Admit Card and Programme are handled in find_answer
-# before these, because they are session-independent / need session checks.
-RULES = [
-    (["fee", "fees", "फीस", "शुल्क"], A_FEE),
-    (["office", "कार्यालय", "college open", "कॉलेज खुला", "college kab",
-      "कॉलेज कब", "office kab", "कार्यालय कब"], A_OFFICE),
-    (["payment", "पेमेंट", "भुगतान", "payment nahi", "kat nahi", "कट नहीं",
-      "deduct", "pay nahi"], A_PAYMENT),
-    (["ex-student", "ex student", "exstudent", "एक्स-स्टूडेंट"], A_EXSTUDENT),
-    (["pms", "scholarship", "छात्रवृत्ति", "छात्रवृति", "scholar"], A_PMS),
-    (["admission", "एडमिशन", "नामांकन", "document", "दस्तावेज"], A_ADMISSION),
-    (["back in paper", "back paper", "backpaper", "बैक"], A_BACK),
-    (["special exam", "विशेष परीक्षा", "exam chhoot", "exam chhut",
-      "missed exam", "chhoot gaya", "छूट गया", "chhut gaya"], A_SPECIAL),
-    (["pmw", "pending", "पेंडिंग"], A_PMW),
-    (["deadline", "last date", "अंतिम तिथि", "last dates",
-      "saari last", "सारी last"], A_DEADLINES),
-    (["exam form", "परीक्षा फॉर्म", "examform", "form bhar", "फॉर्म भर",
-      "form kaise", "form kab"], A_FORM_GENERIC),
-]
+# Intent keyword groups (21 Nov 2026 intent-first fix). find_answer checks
+# the INTENT of the question first (admit? fee? payment? programme?) and
+# only then applies the session — the old first-match RULES list let a
+# session word ("Sem-V") hijack any question into a last-date answer.
+ADMIT_KW = ["admit", "एडमिट"]
+FEE_KW = ["fee", "fees", "फीस", "शुल्क"]
+PAYMENT_KW = ["payment", "पेमेंट", "भुगतान", "deduct", "kat gaya",
+              "कट गया", "kat nahi", "कट नहीं", "pay nahi", "payment nahi"]
+# Payment is "not deducted" only with a negative word; "payment kat gaya"
+# (it WAS deducted) is a different question — it must NOT get the
+# "payment nahi kat raha" answer.
+PAYMENT_NEG_KW = ["nahi", "नहीं", "nhi", "nahin", "fail", "failed",
+                  "atka", "अटका", "ruka", "रुका"]
+OFFICE_KW = ["office", "कार्यालय", "college open", "कॉलेज खुला",
+             "office kab", "कार्यालय कब"]
+# NOTE: bare "college kab" is deliberately NOT an office keyword — it
+# usually means "college kab khulega / chhutti hai kya", not office timing.
+LASTDATE_KW = ["last date", "लास्ट डेट", "अंतिम तिथि", "deadline",
+               "kab tak", "कब तक", "antim", "अंतिम", "aakhri", "आखिरी",
+               "band kab", "बंद कब"]
+FORM_KW = ["exam form", "परीक्षा फॉर्म", "examform", "form bhar",
+           "फॉर्म भर", "form kaise", "form kab"]
+HOW_KW = ["kaise", "कैसे", "how", "tarika", "तरीका", "steps", "process",
+          "प्रक्रिया"]
+BACK_KW = ["back in paper", "back paper", "backpaper", "बैक"]
 
 SESSION_7 = ["2023-27", "2023 27", "sem-vii", "sem vii", "sem-7", "sem 7",
              "sem7", "semester 7", "vii", "7th sem", "7th semester"]
@@ -491,28 +503,51 @@ COLLEGE_KEYWORDS = [
     "back", "बैक", "fee", "फीस", "payment", "भुगतान", "office",
     "कार्यालय", "admission", "नामांकन", "document", "दस्तावेज", "roll",
     "रोल", "pending", "पेंडिंग", "pmw", "special", "विशेष",
+    "chhutti", "छुट्टी", "chutti", "holiday", "band", "बंद",
 ]
 
 
+def _session_of(t):
+    """Which session the question names: 7, 5, 3, or None. Sem-VII is
+    checked first because "sem vii" contains "sem v" as a substring."""
+    if any(k in t for k in SESSION_7):
+        return 7
+    if any(k in t for k in SESSION_5):
+        return 5
+    if any(k in t for k in SESSION_3):
+        return 3
+    return None
+
+
+def _session_form_answer(session):
+    """Exam-form answer for one named session, or None."""
+    if session == 7:
+        return A_SEM7
+    if session == 5:
+        return A_SEM5
+    if session == 3:
+        return A_SEM3_FORM
+    return None
+
+
 def find_answer(text):
-    """Return the answer for a message, or None if it is not a college question."""
+    """Return the answer for a message, or None if it is not a college question.
+
+    INTENT FIRST (21 Nov 2026 fix): the question's intent is decided
+    before its session. A session word must never hijack a fee / payment /
+    admit-card / programme question into a last-date answer. Where the
+    knowledge base only knows one session's fact (admit card, fee,
+    programme are Sem-III-only), a Sem-V / Sem-VII question returns
+    A_FALLBACK so the webhook's Gemini fallback can try the live website
+    notices instead of answering with the wrong session's fact.
+    """
     t = text.lower()
+    session = _session_of(t)
     # 1. Private data: refuse first, whatever else the message says.
     if any(k in t for k in ["roll", "रोल", "password", "पासवर्ड", "user id",
                             "userid", "user-id"]):
         return A_ROLL
-    # 1b. Admission last date (Veeru's post 2097, 18 Nov 2026): no fixed
-    # last date is announced. Word-level match (not exact phrases) so
-    # Devanagari "लास्ट डेट" and other phrasings work too; but an
-    # "exam form" question that merely mentions admission must NOT match.
-    _adm = "admission" in t or "एडमिशन" in t
-    _ld = any(k in t for k in ["last date", "लास्ट डेट", "kab tak",
-                               "कब तक", "antim", "अंतिम", "aakhri",
-                               "आखिरी", "band kab", "बंद कब"])
-    _examform = "exam form" in t or "परीक्षा फॉर्म" in t
-    if _adm and _ld and not _examform:
-        return A_ADMISSION_LASTDATE
-    # 1c. Teacher/sir number: give ONLY the link to the group message
+    # 2. Teacher/sir number: give ONLY the link to the group message
     # that lists the numbers (Veeru's word: "ye link hi de dena").
     # The numbers themselves are never stored in the bot.
     _num = ("number" in t or "नंबर" in t or "no." in t
@@ -522,30 +557,89 @@ def find_answer(text):
                                     "प्राचार्य", "अध्यापक", "मैडम"])
     if _num and _teacher:
         return A_TEACHER_NUMBER
-    # 2. Admit Card is session-independent in the knowledge base.
-    if any(k in t for k in ["admit", "एडमिट"]):
+    # 3. Admission last date (Veeru's post 2097, 18 Nov 2026): no fixed
+    # last date is announced. Word-level match (not exact phrases) so
+    # Devanagari "लास्ट डेट" and other phrasings work too; but an
+    # "exam form" question that merely mentions admission must NOT match.
+    _adm = "admission" in t or "एडमिशन" in t
+    _ld = any(k in t for k in LASTDATE_KW)
+    _examform = any(k in t for k in FORM_KW)
+    if _adm and _ld and not _examform:
+        return A_ADMISSION_LASTDATE
+    # 4. Last date (any topic): PMS -> its own window; a named session ->
+    # that session's last date; otherwise all last dates.
+    if _ld:
+        if any(k in t for k in ["pms", "scholarship", "छात्रवृत्ति",
+                                "छात्रवृति", "scholar"]):
+            return A_PMS
+        ans = _session_form_answer(session)
+        if ans is not None:
+            return ans
+        return A_DEADLINES
+    # 5. Admit Card: only Sem-III's status is known. Sem-V / Sem-VII ->
+    # fallback (AI tries the live notices) instead of the Sem-III answer.
+    if any(k in t for k in ADMIT_KW):
+        if session in (5, 7):
+            return A_FALLBACK
         return A_ADMIT
-    # 3. Programme: only the Sem-III programme is known. A programme
-    # question about Sem-VII / Sem-V honestly falls through to the fallback.
+    # 6. Programme: only the Sem-III programme is known.
     if any(k in t for k in PROGRAMME_KW):
-        if any(k in t for k in SESSION_7 + SESSION_5):
+        if session in (5, 7):
             return A_FALLBACK
         return A_PROGRAMME
-    # 4. Session-specific exam-form answers.
-    for kws, ans in [(SESSION_7, A_SEM7), (SESSION_5, A_SEM5),
-                     (SESSION_3, A_SEM3_FORM)]:
-        if any(k in t for k in kws):
+    # 7. Fee: only the Sem-III fee (Rs. 800) is known.
+    if any(k in t for k in FEE_KW):
+        if session in (5, 7):
+            return A_FALLBACK
+        return A_FEE
+    # 8. Payment: "nahi kat raha" -> validate-wait answer; "kat gaya" or
+    # any other payment question -> fallback (AI), never the opposite answer.
+    if any(k in t for k in PAYMENT_KW):
+        if any(k in t for k in PAYMENT_NEG_KW):
+            return A_PAYMENT
+        return A_FALLBACK
+    # 9. Ex-Student.
+    if any(k in t for k in ["ex-student", "ex student", "exstudent",
+                            "एक्स-स्टूडेंट"]):
+        return A_EXSTUDENT
+    # 10. PMS Scholarship.
+    if any(k in t for k in ["pms", "scholarship", "छात्रवृत्ति",
+                            "छात्रवृति", "scholar"]):
+        return A_PMS
+    # 11. Back paper: the canned answer is ONLY for "marksheet me ABSENT /
+    # Back likha hai". A back-paper FORM / date question goes to the AI.
+    # Bare "back" counts too when the marksheet context is there.
+    _back = (any(k in t for k in BACK_KW) or "back" in t or "बैक" in t)
+    if _back:
+        if any(k in t for k in ["marksheet", "मार्कशीट", "absent",
+                                "likha", "लिखा"]):
+            return A_BACK
+        if any(k in t for k in BACK_KW):
+            return A_FALLBACK
+    # 12. Special Exam.
+    if any(k in t for k in ["special exam", "विशेष परीक्षा", "exam chhoot",
+                            "exam chhut", "missed exam", "chhoot gaya",
+                            "छूट गया", "chhut gaya"]):
+        return A_SPECIAL
+    # 13. PMW / Pending result.
+    if any(k in t for k in ["pmw", "pending", "पेंडिंग"]):
+        return A_PMW
+    # 14. Office timing (narrow: "college kab" alone is NOT office timing).
+    if any(k in t for k in OFFICE_KW):
+        return A_OFFICE
+    # 15. Admission documents — must not hijack a question that merely
+    # mentions admission while asking about the exam form / last dates.
+    if _adm and not _examform and not _ld:
+        return A_ADMISSION
+    # 16. How to fill the exam form (online; steps + link on the website).
+    if any(k in t for k in HOW_KW) and _examform:
+        return A_FORM_HOW
+    # 17. Exam form, generic: named session -> its answer, else all sessions.
+    if _examform:
+        ans = _session_form_answer(session)
+        if ans is not None:
             return ans
-    # 5. Remaining topic rules, in order. The admission-documents rule
-    # must not hijack a question that merely mentions admission while
-    # asking about the exam form / last dates.
-    admission_docs_ok = ("exam form" not in t and "last date" not in t
-                         and "last dates" not in t)
-    for keywords, answer in RULES:
-        if answer is A_ADMISSION and not admission_docs_ok:
-            continue
-        if any(k in t for k in keywords):
-            return answer
+        return A_FORM_GENERIC
     if any(k in t for k in COLLEGE_KEYWORDS):
         return A_FALLBACK
     return None
