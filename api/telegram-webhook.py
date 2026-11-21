@@ -438,8 +438,11 @@ A_FALLBACK = (
 
 MENU_TEXT = (
     "Wazirganj College Updates\n\n"
-    "Sawal puchna hai? Neeche dabayen:\n\n"
-    "Admin: Veeru Verma"
+    "Sawal puchne se pehle yahan check zaroor karen 👇\n\n"
+    "📱 WhatsApp Channel: "
+    "https://whatsapp.com/channel/0029VbAOPnRFsn0gSrR6By2Q\n"
+    "🌐 Website: https://wazirganjcollege.vercel.app\n\n"
+    "Managed by @veeruverma"
 )
 
 # Starting panel (21 Nov 2026, Veeru's word): SIRF ❓ Ask Me Question.
