@@ -802,6 +802,17 @@
       }
       .check-list .ck svg { width: 13px; height: 13px; }
       @media (min-width: 720px) { .check-list { grid-template-columns: 1fr 1fr; } }
+      /* Desktop (≥1100px): guide pages poori chaudaai use karen —
+         .guide 920px par cap tha, isliye 1680px wale .wrap ke andar
+         dono taraf khaali jagah dikhti thi. Sections 2 columns me
+         aate hain; rule-box / note / actions poori chaudaai lete hain.
+         Screen-only hai — print (A4) layout bilkul nahi badalta. */
+      @media screen and (min-width: 1100px) {
+        .guide { max-width: 1180px; }
+        .guide-card { display: grid; grid-template-columns: 1fr 1fr; column-gap: 28px; row-gap: 24px; align-items: start; }
+        .guide-card > .guide-sec { margin-top: 0; }
+        .guide-card > .rule-box, .guide-card > p, .guide-card > .guide-actions { grid-column: 1 / -1; margin-top: 0 !important; }
+      }
       .login-box { background: var(--surface-alt); border: 1px solid var(--border); border-radius: 10px; padding: 6px 16px; }
       .login-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 12px; padding: 10px 0; border-bottom: 1px dashed var(--border); font-size: .97rem; }
       .login-row:last-child { border-bottom: none; }
