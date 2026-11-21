@@ -322,8 +322,14 @@ A_ROLL = (
 )
 
 A_SEM7 = (
-    "Session 2023-27 (Sem-VII) का Exam Form portal अभी नहीं खुला है। जैसे ही खुलेगा, सूचित कर दिया जाएगा — अभी college आने की आवश्यकता नहीं है। Last Date 19/11/2026 है।"
+    "Session 2023-27 (Sem-VII) ka Exam Form portal abhi nahi khula hai — "
+    "pending hai, university jald hi notice bhejega। Jaise hi portal "
+    "khulega, channel par bata diya jayega।"
 )
+# NOTE: A_SEM7 me koi date NAHI hai (jaan-bujhkar) — 19/11/2026 wali tithi
+# beet chuki hai aur portal khula hi nahi. Isliye sync-bot.py is constant
+# ko skip karega (date-count mismatch -> UNVERIFIED) — jab university ki
+# nayi notice aayegi, tab date wapas daalni hai aur sync phir se chalega.
 
 A_SEM5 = (
     "Session 2024-28 (Sem-V) के Exam Form की Last Date 05/12/2026 है।"
@@ -335,6 +341,20 @@ A_SEM3_FORM = (
 
 A_PROGRAMME = (
     "Sem-III (Session 2025-29) का Exam Programme 26/11/2026 से 02/12/2026 तक है। Details: https://t.me/Wazirganj_Collegeinfo/2179"
+)
+
+# Sem-VII programme (channel post 2054 + website /exam, Memo CEO/971/2026).
+A_PROGRAMME_VII = (
+    "Sem-VII (Session 2023-27) का Exam Programme 26/11/2026 से 30/11/2026 तक है — 26/11 MJC-13, 27/11 MJC-14, 28/11 MJC-15, 30/11 MIC-9। Practical Exam 18/11/2026 से 23/11/2026 तक है। Details: https://t.me/Wazirganj_Collegeinfo/2054"
+)
+
+# Sem-V programme (Veeru's word, 21 Nov 2026: "Sem v ka new exam
+# programme aata hai"). Purana programme (10/12–15/12/2026, Memo
+# CEO/969/2026) QUOTE NAHI karna — naya programme aane wala hai. Ye
+# canned jawab isliye hai taaki fallback AI website se purana programme
+# utha kar na bata de.
+A_PROGRAMME_V = (
+    "Sem-V (Session 2024-28) का new Exam Programme अभी नहीं आया है। जैसे ही आएगा, channel पर बता दिया जाएगा।"
 )
 
 A_ADMIT = (
@@ -368,7 +388,7 @@ A_ADMISSION_LASTDATE = (
 )
 
 A_ADMISSION = (
-    "Admission के लिए चाहिए: Offer Letter, Aadhaar Card, Photo, 10th/12th Marksheet, TC, Caste Certificate, APAAR ID, Bank Passbook, माता-पिता का Aadhaar।"
+    "Admission के लिए चाहिए: Offer Letter, Aadhaar Card, Photo, 10th/12th Marksheet, TC, Caste Certificate, APAAR ID, Bank Passbook, माता-पिता का Aadhaar। Details: https://wazirganjcollege.vercel.app/admission"
 )
 
 A_BACK = (
@@ -380,24 +400,32 @@ A_SPECIAL = (
 )
 
 A_PMW = (
-    "अगर आपका result PMW या PENDING है, तो एक application लिखकर पहले के semesters की marksheet और admit card लगाकर college में जमा करें।"
+    "अगर आपका result PMW या PENDING है, तो एक application लिखकर पहले के semesters की marksheet और admit card लगाकर college में जमा करें। Details: https://wazirganjcollege.vercel.app/result"
 )
 
 A_DEADLINES = (
-    "Exam Form की Last Dates: Sem-III (2025-29) — 21/11/2026, Sem-V (2024-28) — 05/12/2026, Sem-VII (2023-27) — 19/11/2026। PMS Scholarship — 30/11/2026।"
+    "Exam Form की Last Dates: Sem-III (2025-29) — 21/11/2026, Sem-V (2024-28) — 05/12/2026, Sem-VII (2023-27) — portal अभी नहीं खुला है, pending है। Sem-I (2026-30) की कोई Last Date अभी घोषित नहीं है। PMS Scholarship — 30/11/2026।"
 )
+# NOTE: A_DEADLINES me Sem-VII ki koi date NAHI hai (pending) — isliye
+# sync-bot.py is constant ko skip karega (date-count mismatch ->
+# UNVERIFIED). University ki nayi notice aate hi date wapas daalni hai.
 
 A_FORM_GENERIC = (
-    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal अभी नहीं खुला है (Last Date 19/11/2026)।"
+    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal अभी नहीं खुला है (pending है)।"
 )
+# NOTE: A_FORM_GENERIC me bhi Sem-VII ki koi date NAHI hai (pending) —
+# sync-bot.py ise bhi skip karega jab tak university ki nayi notice
+# nahi aati; tab date wapas daalni hai.
 
 # NEW (21 Nov 2026, intent-first fix): "form kaise bharen" ka jawab — pehle
 # ye sawaal session ki last date me kho jata tha. Sirf itna hi kehte hain
 # jo pakka pata hai: form ONLINE bhara jata hai. (Veeru's word, 21 Nov:
-# students ko website pe jaane ko mat bolo — isliye yahan koi website link
-# nahi hai; jiska jawab bot ke paas nahi hai, wo Muse Veeru se puchega.)
+# exam form ki documents list mange to specific page ka link de do —
+# isliye yahan /exam-form ka link hai. Login format isme NAHI hai — bot
+# password wale sawalon ko refuse karta hai, aur Veeru ne login format
+# dene ki confirmation abhi nahi di hai.)
 A_FORM_HOW = (
-    "Exam Form ONLINE bhara jata hai।"
+    "Exam Form ONLINE bhara jata hai। Form के लिए documents की list: https://wazirganjcollege.vercel.app/exam-form"
 )
 
 A_FALLBACK = (
@@ -525,10 +553,13 @@ def find_answer(text):
     INTENT FIRST (21 Nov 2026 fix): the question's intent is decided
     before its session. A session word must never hijack a fee / payment /
     admit-card / programme question into a last-date answer. Where the
-    knowledge base only knows one session's fact (admit card, fee,
-    programme are Sem-III-only), a Sem-V / Sem-VII question returns
-    A_FALLBACK so the webhook's Gemini fallback can try the live website
-    notices instead of answering with the wrong session's fact.
+    knowledge base only knows one session's fact (admit card is
+    Sem-III-only), a Sem-V / Sem-VII question returns A_FALLBACK so the
+    webhook's Gemini fallback can try the live website notices instead of
+    answering with the wrong session's fact. Programme is per-session:
+    Sem-III (link), Sem-VII (dates + link), Sem-V (new programme coming —
+    the old one must NOT be quoted, and it must NOT fall back to the AI,
+    which would quote the old programme from the live website).
     """
     t = text.lower()
     session = _session_of(t)
@@ -576,9 +607,17 @@ def find_answer(text):
         if session in (1, 5, 7):
             return A_FALLBACK
         return A_ADMIT
-    # 6. Programme: only the Sem-III programme is known.
+    # 6. Programme: per session. Sem-VII -> dates + channel link;
+    # Sem-V -> new programme coming (canned, never the old dates, never
+    # the AI fallback — the live website still lists the old programme).
+    # Sem-I -> fallback; no session named -> Sem-III (the only one with
+    # a posted programme).
     if any(k in t for k in PROGRAMME_KW):
-        if session in (1, 5, 7):
+        if session == 7:
+            return A_PROGRAMME_VII
+        if session == 5:
+            return A_PROGRAMME_V
+        if session == 1:
             return A_FALLBACK
         return A_PROGRAMME
     # 7. Fee: Rs. 800 for ALL sessions/semesters (Veeru's word, 21 Nov 2026).
