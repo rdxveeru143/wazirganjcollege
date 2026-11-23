@@ -437,7 +437,7 @@ A_SEM5 = (
 )
 
 A_SEM3_FORM = (
-    "Session 2025-29 (Sem-III) के Exam Form का Portal आज, 23/11/2026 को दोपहर 3:00 बजे बंद हो गया है। अब form नहीं भरा जा सकता। Admit Card University ने जारी कर दिया है, लेकिन College से अभी कोई सूचना नहीं आई है।"
+    "Session 2025-29 (Sem-III) के Exam Form का Portal आज, 23/11/2026 को दोपहर 3:00 बजे बंद हो गया है। अब form नहीं भरा जा सकता। Admit Card University ने जारी कर दिया है।"
 )
 
 A_PROGRAMME = (
@@ -459,7 +459,7 @@ A_PROGRAMME_V = (
 )
 
 A_ADMIT = (
-    "Sem-III (Session 2025-29) का Admit Card University ने जारी कर दिया है, लेकिन College से अभी कोई सूचना नहीं आई है। Admit Card के लिए 75% attendance और Internal Exam में pass होना ज़रूरी है। College की सूचना आते ही channel पर बता दिया जाएगा।"
+    "Sem-III (Session 2025-29) का Admit Card University ने जारी कर दिया है। College ने सूचना जारी की है — Admit Card 24/11/2026 को दोपहर 12:00 बजे के बाद से College कार्यालय से प्राप्त कर लें। Admit Card के लिए 75% attendance और Internal Exam में pass होना ज़रूरी है।"
 )
 
 A_FEE = "Exam Form की fee Rs. 800 है (सभी sessions और semesters के लिए)।"
