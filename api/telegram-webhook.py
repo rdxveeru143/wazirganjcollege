@@ -431,7 +431,7 @@ A_SEM5 = (
 )
 
 A_SEM3_FORM = (
-    "Session 2025-29 (Sem-III) के Exam Form का Portal आज, 23/11/2026 को दोपहर 3:00 बजे बंद हो जाएगा। Portal केवल एक घंटे तक खुला है — जिन्होंने अभी तक form नहीं भरा है, वे तुरंत भर लें। इसके बाद Admit Card जारी किया जाएगा।"
+    "Session 2025-29 (Sem-III) के Exam Form का Portal आज, 23/11/2026 को दोपहर 3:00 बजे बंद हो गया है। अब form नहीं भरा जा सकता। इसके बाद Admit Card जारी किया जाएगा।"
 )
 
 A_PROGRAMME = (
@@ -499,14 +499,14 @@ A_PMW = (
 )
 
 A_DEADLINES = (
-    "Exam Form की Last Dates: Sem-III (2025-29) — 23/11/2026 (आज दोपहर 3:00 बजे तक), Sem-V (2024-28) — 05/12/2026, Sem-VII (2023-27) — portal खुला है, कोई नयी Last Date घोषित नहीं है। Sem-I (2026-30) की कोई Last Date अभी घोषित नहीं है। PMS Scholarship — 30/11/2026।"
+    "Exam Form की Last Dates: Sem-III (2025-29) — 23/11/2026 (Portal बंद हो गया है), Sem-V (2024-28) — 05/12/2026, Sem-VII (2023-27) — portal खुला है, कोई नयी Last Date घोषित नहीं है। Sem-I (2026-30) की कोई Last Date अभी घोषित नहीं है। PMS Scholarship — 30/11/2026।"
 )
 # NOTE: A_DEADLINES me Sem-VII ki koi date NAHI hai (portal khula hai, nayi
 # date ghoshit nahi hai) — isliye sync-bot.py is constant ko skip karega
 # (date-count mismatch -> UNVERIFIED). Nayi date aate hi daalni hai.
 
 A_FORM_GENERIC = (
-    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 23/11/2026 (आज दोपहर 3:00 बजे तक) है, और Sem-VII (Session 2023-27) का portal खुला है (koi nayi Last Date ghoshit nahi hai)।"
+    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) का Portal 23/11/2026 को दोपहर 3:00 बजे बंद हो गया है (अब form नहीं भरा जा सकता), और Sem-VII (Session 2023-27) का portal खुला है (koi nayi Last Date ghoshit nahi hai)।"
 )
 # NOTE: A_FORM_GENERIC me bhi Sem-VII ki koi date NAHI hai (portal khula hai,
 # nayi date ghoshit nahi hai) — sync-bot.py ise bhi skip karega jab tak
