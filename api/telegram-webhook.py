@@ -417,14 +417,14 @@ A_ROLL = (
 )
 
 A_SEM7 = (
-    "Session 2023-27 (Sem-VII) ka Exam Form portal abhi nahi khula hai — "
-    "pending hai, university jald hi notice bhejega। Jaise hi portal "
-    "khulega, channel par bata diya jayega।"
+    "Session 2023-27 (Sem-VII) ka Exam Form portal khula hai — form online "
+    "bharna hai, User ID aur Password se, fee ₹800। Koi nayi Last Date "
+    "ghoshit nahi hai।"
 )
-# NOTE: A_SEM7 me koi date NAHI hai (jaan-bujhkar) — 19/11/2026 wali tithi
-# beet chuki hai aur portal khula hi nahi. Isliye sync-bot.py is constant
-# ko skip karega (date-count mismatch -> UNVERIFIED) — jab university ki
-# nayi notice aayegi, tab date wapas daalni hai aur sync phir se chalega.
+# NOTE: A_SEM7 me koi date NAHI hai (jaan-bujhkar) — CEO/1119/2026 (21/11/2026)
+# ke anusar portal khula hai aur form online bharna hai, lekin koi nayi Last
+# Date ghoshit nahi hai. Isliye sync-bot.py is constant ko skip karega
+# (date-count mismatch -> UNVERIFIED) — nayi date aate hi daalni hai.
 
 A_SEM5 = (
     "Session 2024-28 (Sem-V) के Exam Form की Last Date 05/12/2026 है।"
@@ -499,18 +499,18 @@ A_PMW = (
 )
 
 A_DEADLINES = (
-    "Exam Form की Last Dates: Sem-III (2025-29) — 21/11/2026, Sem-V (2024-28) — 05/12/2026, Sem-VII (2023-27) — portal अभी नहीं खुला है, pending है। Sem-I (2026-30) की कोई Last Date अभी घोषित नहीं है। PMS Scholarship — 30/11/2026।"
+    "Exam Form की Last Dates: Sem-III (2025-29) — 21/11/2026, Sem-V (2024-28) — 05/12/2026, Sem-VII (2023-27) — portal खुला है, कोई नयी Last Date घोषित नहीं है। Sem-I (2026-30) की कोई Last Date अभी घोषित नहीं है। PMS Scholarship — 30/11/2026।"
 )
-# NOTE: A_DEADLINES me Sem-VII ki koi date NAHI hai (pending) — isliye
-# sync-bot.py is constant ko skip karega (date-count mismatch ->
-# UNVERIFIED). University ki nayi notice aate hi date wapas daalni hai.
+# NOTE: A_DEADLINES me Sem-VII ki koi date NAHI hai (portal khula hai, nayi
+# date ghoshit nahi hai) — isliye sync-bot.py is constant ko skip karega
+# (date-count mismatch -> UNVERIFIED). Nayi date aate hi daalni hai.
 
 A_FORM_GENERIC = (
-    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal अभी नहीं खुला है (pending है)।"
+    "Sem-V (Session 2024-28) के Exam Form की Last Date 05/12/2026 है, Sem-III (Session 2025-29) की 21/11/2026 है, और Sem-VII (Session 2023-27) का portal खुला है (koi nayi Last Date ghoshit nahi hai)।"
 )
-# NOTE: A_FORM_GENERIC me bhi Sem-VII ki koi date NAHI hai (pending) —
-# sync-bot.py ise bhi skip karega jab tak university ki nayi notice
-# nahi aati; tab date wapas daalni hai.
+# NOTE: A_FORM_GENERIC me bhi Sem-VII ki koi date NAHI hai (portal khula hai,
+# nayi date ghoshit nahi hai) — sync-bot.py ise bhi skip karega jab tak
+# university ki nayi notice nahi aati; tab date wapas daalni hai.
 
 # NEW (21 Nov 2026, intent-first fix): "form kaise bharen" ka jawab — pehle
 # ye sawaal session ki last date me kho jata tha. Sirf itna hi kehte hain
