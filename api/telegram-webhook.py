@@ -383,6 +383,12 @@ def handle_message(msg):
         return
     if chat.get("id") != GROUP_CHAT_ID:
         return
+    # Channel posts auto-forwarded to the group (sender_chat = channel,
+    # is_automatic_forward) must NEVER get a reply — Veeru's rule.
+    if msg.get("is_automatic_forward"):
+        return
+    if msg.get("sender_chat", {}).get("type") == "channel":
+        return
     sender = msg.get("from", {})
     if sender.get("is_bot"):
         return
