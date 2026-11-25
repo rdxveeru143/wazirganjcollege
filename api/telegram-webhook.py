@@ -449,9 +449,12 @@ A_PROGRAMME = (
     "Sem-III (Session 2025-29) का Exam Programme 26/11/2026 से 02/12/2026 तक है। Details: https://t.me/Wazirganj_Collegeinfo/2179"
 )
 
-# Sem-VII programme (channel post 2054 + website /exam, Memo CEO/971/2026).
+# Sem-VII programme (channel post 2200 + website /exam).
+# REVISED 25 Nov 2026 (Memo CEO/1137/2026, dated 25/11/2026): theory moved
+# from 26/11-30/11 to 19/12-23/12/2026; practicals from 18/11-23/11 to
+# 12/12-17/12/2026. Old programme was Memo CEO/971/2026 (post 2054).
 A_PROGRAMME_VII = (
-    "Sem-VII (Session 2023-27) का Exam Programme 26/11/2026 से 30/11/2026 तक है — 26/11 MJC-13, 27/11 MJC-14, 28/11 MJC-15, 30/11 MIC-9। Practical Exam 18/11/2026 से 23/11/2026 तक है। Details: https://t.me/Wazirganj_Collegeinfo/2054"
+    "Sem-VII (Session 2023-27) का Revised Exam Programme 19/12/2026 से 23/12/2026 तक है — 19/12 MJC-13, 21/12 MJC-14, 22/12 MJC-15, 23/12 MIC-9। Practical Exam 12/12/2026 से 17/12/2026 तक है। Details: https://t.me/Wazirganj_Collegeinfo/2200"
 )
 
 # Sem-V programme (Veeru's word, 21 Nov 2026: "Sem v ka new exam
