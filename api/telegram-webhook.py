@@ -18,7 +18,9 @@ replacement because its systemd unit lives in ephemeral /etc.
   Link-only answers (teacher number) and refusals (roll/password) are
   never rephrased. Questions the rules cannot answer go to Gemini
   grounded ONLY on the live website's notices + past Q&A (fetched at
-  runtime); ungrounded -> NAHI_PATA -> A_FALLBACK. No key
+  runtime); ungrounded -> NAHI_PATA -> NO REPLY (bot stays silent;
+  25 Nov 2026, Veeru: "Ye band kr do" — the old A_FALLBACK 'koi
+  suchna nahi aayi' reply is OFF). No key
   (GEMINI_API_KEY) = no AI, canned behaviour unchanged.
 - Replies ONLY in the discussion group (GROUP_CHAT_ID). Never in
   private chats or other groups. Same rules as the polling bot:
@@ -262,12 +264,15 @@ def past_qa_lines():
 
 def final_answer(question, canned):
     """The reply to send: canned fact in AI tone, or the AI-grounded
-    answer for questions the rules cannot answer."""
+    answer for questions the rules cannot answer. Returns None when
+    nothing is known — the bot then stays SILENT (25 Nov 2026, Veeru's
+    word: "Ye band kr do" — the old A_FALLBACK 'koi suchna nahi aayi'
+    reply is OFF; no reply is better than that reply)."""
     if canned is None:
         return None
     if canned == A_FALLBACK:
         ai = ai_answer(question)
-        return ai if ai else A_FALLBACK
+        return ai if ai else None
     return ai_rephrase(question, canned)
 
 
