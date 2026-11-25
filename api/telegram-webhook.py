@@ -595,17 +595,17 @@ HOW_KW = ["kaise", "कैसे", "how", "tarika", "तरीका", "steps", 
           "प्रक्रिया"]
 BACK_KW = ["back in paper", "back paper", "backpaper", "बैक"]
 
-SESSION_7 = ["2023-27", "2023 27", "sem-vii", "sem vii", "sem-7", "sem 7",
+SESSION_7 = ["2023-27", "2023 27", "23-27", "23 27", "sem-vii", "sem vii", "sem-7", "sem 7",
              "sem7", "semester 7", "vii", "7th sem", "7th semester"]
-SESSION_5 = ["2024-28", "2024 28", "sem-v", "sem v", "sem-5", "sem 5",
+SESSION_5 = ["2024-28", "2024 28", "24-28", "24 28", "sem-v", "sem v", "sem-5", "sem 5",
              "sem5", "semester 5", "5th sem", "5th semester"]
-SESSION_3 = ["2025-29", "2025 29", "sem-iii", "sem iii", "sem-3", "sem 3",
+SESSION_3 = ["2025-29", "2025 29", "25-29", "25 29", "sem-iii", "sem iii", "sem-3", "sem 3",
              "sem3", "semester 3", "3rd sem", "3rd semester"]
 # Sem-I (2026-30): newest session. No exam-form / programme / admit-card
 # fact is known for it yet — those questions fall through to the AI
 # fallback instead of borrowing another session's fact. ("sem i" is
 # deliberately NOT listed: it is a substring of "sem iii".)
-SESSION_1 = ["2026-30", "2026 30", "sem-1", "sem 1",
+SESSION_1 = ["2026-30", "2026 30", "26-30", "26 30", "sem-1", "sem 1",
              "sem1", "semester 1", "1st sem", "1st semester"]
 PROGRAMME_KW = ["programme", "program", "कार्यक्रम", "date sheet",
                 "datesheet", "time table", "टाइम टेबल", "परीक्षा तिथि",
