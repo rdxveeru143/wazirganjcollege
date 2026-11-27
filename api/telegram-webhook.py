@@ -318,7 +318,7 @@ def is_paused():
 
 
 def handle_admin_command(msg):
-    """Admin-only commands /stop and /text. Returns True if the message
+    """Admin-only commands /stop, /text and /react. Returns True if the message
     was one of them (handled or silently ignored), else False.
 
     /stop — stops the bot's replies for 5 minutes; sends one
@@ -326,8 +326,12 @@ def handle_admin_command(msg):
     /text — only when an admin replies to (tags) a message with
     "/text <message>": the bot sends that message as its own reply to
     the tagged message, then deletes the admin's /text message (so
-    students see only the bot's reply). Both admin-only; anyone else
-    is silently ignored.
+    students see only the bot's reply).
+    /react — only when an admin replies to (tags) a message with
+    "/react <emoji>": the bot adds that emoji reaction to the tagged
+    message, then deletes the admin's /react message (so students see
+    only the reaction). All three admin-only; anyone else is silently
+    ignored.
     """
     global PAUSED_UNTIL
     chat = msg.get("chat", {})
@@ -335,7 +339,8 @@ def handle_admin_command(msg):
     text = msg.get("text") or ""
     cmd = text.strip().split()[0].lower() if text.strip() else ""
     if cmd not in ("/stop", "/stop@wcu_assistantbot",
-                   "/text", "/text@wcu_assistantbot"):
+                   "/text", "/text@wcu_assistantbot",
+                   "/react", "/react@wcu_assistantbot"):
         return False
     if not is_admin(sender.get("id")):
         return True
@@ -348,6 +353,24 @@ def handle_admin_command(msg):
                      "koi jawab nahi dega।" % until_ist,
                      reply_to=msg.get("message_id"))
         print("telegram-webhook: paused by admin until %s IST" % until_ist)
+        return True
+    if cmd in ("/react", "/react@wcu_assistantbot"):
+        target = msg.get("reply_to_message") or {}
+        parts = text.strip().split(None, 1)
+        emoji = parts[1].strip() if len(parts) > 1 else ""
+        if not target or not emoji:
+            return True
+        emoji = emoji.split()[0]
+        ok = tg("setMessageReaction", {
+            "chat_id": chat["id"],
+            "message_id": target.get("message_id"),
+            "reaction": [{"type": "emoji", "emoji": emoji}],
+        })
+        if ok:
+            tg("deleteMessage", {"chat_id": chat["id"],
+                                 "message_id": msg.get("message_id")})
+            print("telegram-webhook: reacted %s to msg %s; command deleted"
+                  % (emoji, target.get("message_id")))
         return True
     target = msg.get("reply_to_message") or {}
     parts = text.strip().split(None, 1)
